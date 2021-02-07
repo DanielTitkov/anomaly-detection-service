@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type (
 	Anomaly struct {
 		ID                     int
@@ -20,5 +22,22 @@ type (
 	DetectionJobInstance struct {
 		ID             int
 		DetectionJobID int // related job
+	}
+	Dataset struct {
+		SiteID    string
+		Metric    string
+		Attribute string
+		StartDate time.Time
+		EndDate   time.Time
+		Data      []DataItem
+	}
+	DataItem struct {
+		Timestamp time.Time
+		Value     float64
+	}
+	Notification struct {
+		ChannelID string
+		Warnings  Anomaly
+		Alarms    Anomaly
 	}
 )

@@ -8,9 +8,11 @@ import (
 
 type (
 	App struct {
-		cfg    configs.Config
-		logger *logger.Logger
-		repo   Repository
+		cfg                 configs.Config
+		logger              *logger.Logger
+		repo                Repository
+		datasetService      DatasetFetcher
+		notificationService Notifier
 	}
 	Repository interface {
 		// anomalies
@@ -23,6 +25,12 @@ type (
 		DeleteDetectionJobByID(int) error
 		FilterDetectionJobs(*domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error)
 		CreateDetectionInstanceJob(*domain.DetectionJobInstance) (*domain.DetectionJobInstance, error)
+	}
+	DatasetFetcher interface {
+		Fetch(*domain.FetchDatasetArgs) (*domain.Dataset, error)
+	}
+	Notifier interface {
+		Notify(*domain.Notification) error
 	}
 )
 
