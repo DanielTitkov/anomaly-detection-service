@@ -8,10 +8,8 @@ import (
 
 type Config struct {
 	Env    string
-	Auth   AuthConfig
 	DB     DBConfig
 	Server ServerConfig
-	Task   TaskConfig
 	Job    JobConfig
 }
 

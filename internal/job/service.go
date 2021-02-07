@@ -29,8 +29,8 @@ func NewService(
 func (s *Service) GatherSystemSummary() {
 	go func() {
 		for {
-			s.app.CreateSystemSummary()
-			s.logger.Info("calculated system summary", "")
+			// s.app.CreateSystemSummary()
+			// s.logger.Info("calculated system summary", "")
 			time.Sleep(time.Duration(s.cfg.Job.SystemSummaryPeriod) * time.Second)
 		}
 	}()

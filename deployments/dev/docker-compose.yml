@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  db:
+  detector_db:
     image: postgres
     restart: unless-stopped
     environment:

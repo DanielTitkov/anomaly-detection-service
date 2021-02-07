@@ -5,112 +5,91 @@ package ent
 import (
 	"time"
 
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/item"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/anomaly"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjob"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjobinstance"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/schema"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/systemsummary"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/task"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/tasktype"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/user"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	itemMixin := schema.Item{}.Mixin()
-	itemMixinFields0 := itemMixin[0].Fields()
-	itemFields := schema.Item{}.Fields()
-	_ = itemFields
-	// itemDescCreateTime is the schema descriptor for create_time field.
-	itemDescCreateTime := itemMixinFields0[0].Descriptor()
-	// item.DefaultCreateTime holds the default value on creation for the create_time field.
-	item.DefaultCreateTime = itemDescCreateTime.Default.(func() time.Time)
-	// itemDescUpdateTime is the schema descriptor for update_time field.
-	itemDescUpdateTime := itemMixinFields0[1].Descriptor()
-	// item.DefaultUpdateTime holds the default value on creation for the update_time field.
-	item.DefaultUpdateTime = itemDescUpdateTime.Default.(func() time.Time)
-	// item.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	item.UpdateDefaultUpdateTime = itemDescUpdateTime.UpdateDefault.(func() time.Time)
-	// itemDescSource is the schema descriptor for source field.
-	itemDescSource := itemFields[0].Descriptor()
-	// item.SourceValidator is a validator for the "source" field. It is called by the builders before save.
-	item.SourceValidator = itemDescSource.Validators[0].(func(string) error)
-	// itemDescHash is the schema descriptor for hash field.
-	itemDescHash := itemFields[1].Descriptor()
-	// item.HashValidator is a validator for the "hash" field. It is called by the builders before save.
-	item.HashValidator = itemDescHash.Validators[0].(func(string) error)
-	systemsummaryMixin := schema.SystemSummary{}.Mixin()
-	systemsummaryMixinFields0 := systemsummaryMixin[0].Fields()
-	systemsummaryFields := schema.SystemSummary{}.Fields()
-	_ = systemsummaryFields
-	// systemsummaryDescCreateTime is the schema descriptor for create_time field.
-	systemsummaryDescCreateTime := systemsummaryMixinFields0[0].Descriptor()
-	// systemsummary.DefaultCreateTime holds the default value on creation for the create_time field.
-	systemsummary.DefaultCreateTime = systemsummaryDescCreateTime.Default.(func() time.Time)
-	taskMixin := schema.Task{}.Mixin()
-	taskMixinFields0 := taskMixin[0].Fields()
-	taskFields := schema.Task{}.Fields()
-	_ = taskFields
-	// taskDescCreateTime is the schema descriptor for create_time field.
-	taskDescCreateTime := taskMixinFields0[0].Descriptor()
-	// task.DefaultCreateTime holds the default value on creation for the create_time field.
-	task.DefaultCreateTime = taskDescCreateTime.Default.(func() time.Time)
-	// taskDescUpdateTime is the schema descriptor for update_time field.
-	taskDescUpdateTime := taskMixinFields0[1].Descriptor()
-	// task.DefaultUpdateTime holds the default value on creation for the update_time field.
-	task.DefaultUpdateTime = taskDescUpdateTime.Default.(func() time.Time)
-	// task.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	task.UpdateDefaultUpdateTime = taskDescUpdateTime.UpdateDefault.(func() time.Time)
-	// taskDescSlug is the schema descriptor for slug field.
-	taskDescSlug := taskFields[0].Descriptor()
-	// task.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
-	task.SlugValidator = taskDescSlug.Validators[0].(func(string) error)
-	// taskDescTitle is the schema descriptor for title field.
-	taskDescTitle := taskFields[1].Descriptor()
-	// task.TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	task.TitleValidator = taskDescTitle.Validators[0].(func(string) error)
-	// taskDescCode is the schema descriptor for code field.
-	taskDescCode := taskFields[3].Descriptor()
-	// task.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	task.CodeValidator = taskDescCode.Validators[0].(func(string) error)
-	// taskDescActive is the schema descriptor for active field.
-	taskDescActive := taskFields[4].Descriptor()
-	// task.DefaultActive holds the default value on creation for the active field.
-	task.DefaultActive = taskDescActive.Default.(bool)
-	tasktypeFields := schema.TaskType{}.Fields()
-	_ = tasktypeFields
-	// tasktypeDescCode is the schema descriptor for code field.
-	tasktypeDescCode := tasktypeFields[0].Descriptor()
-	// tasktype.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	tasktype.CodeValidator = tasktypeDescCode.Validators[0].(func(string) error)
-	// tasktypeDescTitle is the schema descriptor for title field.
-	tasktypeDescTitle := tasktypeFields[1].Descriptor()
-	// tasktype.TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	tasktype.TitleValidator = tasktypeDescTitle.Validators[0].(func(string) error)
-	userMixin := schema.User{}.Mixin()
-	userMixinFields0 := userMixin[0].Fields()
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescCreateTime is the schema descriptor for create_time field.
-	userDescCreateTime := userMixinFields0[0].Descriptor()
-	// user.DefaultCreateTime holds the default value on creation for the create_time field.
-	user.DefaultCreateTime = userDescCreateTime.Default.(func() time.Time)
-	// userDescUpdateTime is the schema descriptor for update_time field.
-	userDescUpdateTime := userMixinFields0[1].Descriptor()
-	// user.DefaultUpdateTime holds the default value on creation for the update_time field.
-	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
-	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
-	// userDescUsername is the schema descriptor for username field.
-	userDescUsername := userFields[0].Descriptor()
-	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
-	user.UsernameValidator = userDescUsername.Validators[0].(func(string) error)
-	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[1].Descriptor()
-	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
-	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
-	// userDescService is the schema descriptor for service field.
-	userDescService := userFields[3].Descriptor()
-	// user.DefaultService holds the default value on creation for the service field.
-	user.DefaultService = userDescService.Default.(bool)
+	anomalyMixin := schema.Anomaly{}.Mixin()
+	anomalyMixinFields0 := anomalyMixin[0].Fields()
+	_ = anomalyMixinFields0
+	anomalyFields := schema.Anomaly{}.Fields()
+	_ = anomalyFields
+	// anomalyDescCreateTime is the schema descriptor for create_time field.
+	anomalyDescCreateTime := anomalyMixinFields0[0].Descriptor()
+	// anomaly.DefaultCreateTime holds the default value on creation for the create_time field.
+	anomaly.DefaultCreateTime = anomalyDescCreateTime.Default.(func() time.Time)
+	// anomalyDescUpdateTime is the schema descriptor for update_time field.
+	anomalyDescUpdateTime := anomalyMixinFields0[1].Descriptor()
+	// anomaly.DefaultUpdateTime holds the default value on creation for the update_time field.
+	anomaly.DefaultUpdateTime = anomalyDescUpdateTime.Default.(func() time.Time)
+	// anomaly.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	anomaly.UpdateDefaultUpdateTime = anomalyDescUpdateTime.UpdateDefault.(func() time.Time)
+	// anomalyDescType is the schema descriptor for type field.
+	anomalyDescType := anomalyFields[0].Descriptor()
+	// anomaly.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	anomaly.TypeValidator = anomalyDescType.Validators[0].(func(string) error)
+	// anomalyDescProcessed is the schema descriptor for processed field.
+	anomalyDescProcessed := anomalyFields[2].Descriptor()
+	// anomaly.DefaultProcessed holds the default value on creation for the processed field.
+	anomaly.DefaultProcessed = anomalyDescProcessed.Default.(bool)
+	detectionjobMixin := schema.DetectionJob{}.Mixin()
+	detectionjobMixinFields0 := detectionjobMixin[0].Fields()
+	_ = detectionjobMixinFields0
+	detectionjobFields := schema.DetectionJob{}.Fields()
+	_ = detectionjobFields
+	// detectionjobDescCreateTime is the schema descriptor for create_time field.
+	detectionjobDescCreateTime := detectionjobMixinFields0[0].Descriptor()
+	// detectionjob.DefaultCreateTime holds the default value on creation for the create_time field.
+	detectionjob.DefaultCreateTime = detectionjobDescCreateTime.Default.(func() time.Time)
+	// detectionjobDescUpdateTime is the schema descriptor for update_time field.
+	detectionjobDescUpdateTime := detectionjobMixinFields0[1].Descriptor()
+	// detectionjob.DefaultUpdateTime holds the default value on creation for the update_time field.
+	detectionjob.DefaultUpdateTime = detectionjobDescUpdateTime.Default.(func() time.Time)
+	// detectionjob.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	detectionjob.UpdateDefaultUpdateTime = detectionjobDescUpdateTime.UpdateDefault.(func() time.Time)
+	// detectionjobDescMethod is the schema descriptor for method field.
+	detectionjobDescMethod := detectionjobFields[1].Descriptor()
+	// detectionjob.MethodValidator is a validator for the "method" field. It is called by the builders before save.
+	detectionjob.MethodValidator = detectionjobDescMethod.Validators[0].(func(string) error)
+	// detectionjobDescSiteID is the schema descriptor for site_id field.
+	detectionjobDescSiteID := detectionjobFields[2].Descriptor()
+	// detectionjob.SiteIDValidator is a validator for the "site_id" field. It is called by the builders before save.
+	detectionjob.SiteIDValidator = detectionjobDescSiteID.Validators[0].(func(string) error)
+	// detectionjobDescMetric is the schema descriptor for metric field.
+	detectionjobDescMetric := detectionjobFields[3].Descriptor()
+	// detectionjob.MetricValidator is a validator for the "metric" field. It is called by the builders before save.
+	detectionjob.MetricValidator = detectionjobDescMetric.Validators[0].(func(string) error)
+	// detectionjobDescAttribute is the schema descriptor for attribute field.
+	detectionjobDescAttribute := detectionjobFields[4].Descriptor()
+	// detectionjob.AttributeValidator is a validator for the "attribute" field. It is called by the builders before save.
+	detectionjob.AttributeValidator = detectionjobDescAttribute.Validators[0].(func(string) error)
+	detectionjobinstanceMixin := schema.DetectionJobInstance{}.Mixin()
+	detectionjobinstanceMixinFields0 := detectionjobinstanceMixin[0].Fields()
+	_ = detectionjobinstanceMixinFields0
+	detectionjobinstanceFields := schema.DetectionJobInstance{}.Fields()
+	_ = detectionjobinstanceFields
+	// detectionjobinstanceDescCreateTime is the schema descriptor for create_time field.
+	detectionjobinstanceDescCreateTime := detectionjobinstanceMixinFields0[0].Descriptor()
+	// detectionjobinstance.DefaultCreateTime holds the default value on creation for the create_time field.
+	detectionjobinstance.DefaultCreateTime = detectionjobinstanceDescCreateTime.Default.(func() time.Time)
+	// detectionjobinstanceDescUpdateTime is the schema descriptor for update_time field.
+	detectionjobinstanceDescUpdateTime := detectionjobinstanceMixinFields0[1].Descriptor()
+	// detectionjobinstance.DefaultUpdateTime holds the default value on creation for the update_time field.
+	detectionjobinstance.DefaultUpdateTime = detectionjobinstanceDescUpdateTime.Default.(func() time.Time)
+	// detectionjobinstance.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	detectionjobinstance.UpdateDefaultUpdateTime = detectionjobinstanceDescUpdateTime.UpdateDefault.(func() time.Time)
+	// detectionjobinstanceDescType is the schema descriptor for type field.
+	detectionjobinstanceDescType := detectionjobinstanceFields[0].Descriptor()
+	// detectionjobinstance.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	detectionjobinstance.TypeValidator = detectionjobinstanceDescType.Validators[0].(func(string) error)
+	// detectionjobinstanceDescProcessed is the schema descriptor for processed field.
+	detectionjobinstanceDescProcessed := detectionjobinstanceFields[2].Descriptor()
+	// detectionjobinstance.DefaultProcessed holds the default value on creation for the processed field.
+	detectionjobinstance.DefaultProcessed = detectionjobinstanceDescProcessed.Default.(bool)
 }

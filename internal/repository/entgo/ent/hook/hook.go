@@ -9,67 +9,41 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent"
 )
 
-// The ItemFunc type is an adapter to allow the use of ordinary
-// function as Item mutator.
-type ItemFunc func(context.Context, *ent.ItemMutation) (ent.Value, error)
+// The AnomalyFunc type is an adapter to allow the use of ordinary
+// function as Anomaly mutator.
+type AnomalyFunc func(context.Context, *ent.AnomalyMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f ItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ItemMutation)
+func (f AnomalyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AnomalyMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnomalyMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The SystemSummaryFunc type is an adapter to allow the use of ordinary
-// function as SystemSummary mutator.
-type SystemSummaryFunc func(context.Context, *ent.SystemSummaryMutation) (ent.Value, error)
+// The DetectionJobFunc type is an adapter to allow the use of ordinary
+// function as DetectionJob mutator.
+type DetectionJobFunc func(context.Context, *ent.DetectionJobMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f SystemSummaryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SystemSummaryMutation)
+func (f DetectionJobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DetectionJobMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SystemSummaryMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DetectionJobMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The TaskFunc type is an adapter to allow the use of ordinary
-// function as Task mutator.
-type TaskFunc func(context.Context, *ent.TaskMutation) (ent.Value, error)
+// The DetectionJobInstanceFunc type is an adapter to allow the use of ordinary
+// function as DetectionJobInstance mutator.
+type DetectionJobInstanceFunc func(context.Context, *ent.DetectionJobInstanceMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f TaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TaskMutation)
+func (f DetectionJobInstanceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DetectionJobInstanceMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TaskMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The TaskTypeFunc type is an adapter to allow the use of ordinary
-// function as TaskType mutator.
-type TaskTypeFunc func(context.Context, *ent.TaskTypeMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TaskTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TaskTypeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TaskTypeMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The UserFunc type is an adapter to allow the use of ordinary
-// function as User mutator.
-type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DetectionJobInstanceMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -168,7 +142,7 @@ func HasFields(field string, fields ...string) Condition {
 
 // If executes the given hook under condition.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
 func If(hk ent.Hook, cond Condition) ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
@@ -197,6 +171,15 @@ func Unless(hk ent.Hook, op ent.Op) ent.Hook {
 	return If(hk, Not(HasOp(op)))
 }
 
+// FixedError is a hook returning a fixed error.
+func FixedError(err error) ent.Hook {
+	return func(ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(context.Context, ent.Mutation) (ent.Value, error) {
+			return nil, err
+		})
+	}
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []ent.Hook {
@@ -206,11 +189,7 @@ func Unless(hk ent.Hook, op ent.Op) ent.Hook {
 //	}
 //
 func Reject(op ent.Op) ent.Hook {
-	hk := func(ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(_ context.Context, m ent.Mutation) (ent.Value, error) {
-			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
-		})
-	}
+	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)
 }
 

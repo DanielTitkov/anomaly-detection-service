@@ -3,145 +3,89 @@
 package migrate
 
 import (
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/schema/field"
 )
 
 var (
-	// ItemsColumns holds the columns for the "items" table.
-	ItemsColumns = []*schema.Column{
+	// AnomaliesColumns holds the columns for the "anomalies" table.
+	AnomaliesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "source", Type: field.TypeString},
-		{Name: "hash", Type: field.TypeString},
-		{Name: "data", Type: field.TypeJSON, Nullable: true},
-		{Name: "task_items", Type: field.TypeInt, Nullable: true},
+		{Name: "type", Type: field.TypeString},
+		{Name: "value", Type: field.TypeFloat64},
+		{Name: "processed", Type: field.TypeBool},
+		{Name: "detection_job_instance_anomalies", Type: field.TypeInt, Nullable: true},
 	}
-	// ItemsTable holds the schema information for the "items" table.
-	ItemsTable = &schema.Table{
-		Name:       "items",
-		Columns:    ItemsColumns,
-		PrimaryKey: []*schema.Column{ItemsColumns[0]},
+	// AnomaliesTable holds the schema information for the "anomalies" table.
+	AnomaliesTable = &schema.Table{
+		Name:       "anomalies",
+		Columns:    AnomaliesColumns,
+		PrimaryKey: []*schema.Column{AnomaliesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "items_tasks_items",
-				Columns: []*schema.Column{ItemsColumns[6]},
+				Symbol:  "anomalies_detection_job_instances_anomalies",
+				Columns: []*schema.Column{AnomaliesColumns[6]},
 
-				RefColumns: []*schema.Column{TasksColumns[0]},
+				RefColumns: []*schema.Column{DetectionJobInstancesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// SystemSummariesColumns holds the columns for the "system_summaries" table.
-	SystemSummariesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "users", Type: field.TypeInt},
-		{Name: "tasks", Type: field.TypeInt},
-		{Name: "active_tasks", Type: field.TypeInt},
-		{Name: "items", Type: field.TypeInt},
-		{Name: "avg_items_per_task", Type: field.TypeFloat64},
-	}
-	// SystemSummariesTable holds the schema information for the "system_summaries" table.
-	SystemSummariesTable = &schema.Table{
-		Name:        "system_summaries",
-		Columns:     SystemSummariesColumns,
-		PrimaryKey:  []*schema.Column{SystemSummariesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// TasksColumns holds the columns for the "tasks" table.
-	TasksColumns = []*schema.Column{
+	// DetectionJobsColumns holds the columns for the "detection_jobs" table.
+	DetectionJobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "slug", Type: field.TypeString},
-		{Name: "title", Type: field.TypeString},
+		{Name: "schedule", Type: field.TypeString, Nullable: true},
+		{Name: "method", Type: field.TypeString},
+		{Name: "site_id", Type: field.TypeString},
+		{Name: "metric", Type: field.TypeString},
+		{Name: "attribute", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
-		{Name: "active", Type: field.TypeBool},
-		{Name: "delete_time", Type: field.TypeTime, Nullable: true},
-		{Name: "params", Type: field.TypeJSON, Nullable: true},
-		{Name: "meta", Type: field.TypeJSON, Nullable: true},
-		{Name: "task_type_tasks", Type: field.TypeInt, Nullable: true},
-		{Name: "user_tasks", Type: field.TypeInt, Nullable: true},
 	}
-	// TasksTable holds the schema information for the "tasks" table.
-	TasksTable = &schema.Table{
-		Name:       "tasks",
-		Columns:    TasksColumns,
-		PrimaryKey: []*schema.Column{TasksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "tasks_task_types_tasks",
-				Columns: []*schema.Column{TasksColumns[11]},
-
-				RefColumns: []*schema.Column{TaskTypesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:  "tasks_users_tasks",
-				Columns: []*schema.Column{TasksColumns[12]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "task_slug_user_tasks",
-				Unique:  true,
-				Columns: []*schema.Column{TasksColumns[3], TasksColumns[12]},
-			},
-			{
-				Name:    "task_title_user_tasks",
-				Unique:  true,
-				Columns: []*schema.Column{TasksColumns[4], TasksColumns[12]},
-			},
-		},
-	}
-	// TaskTypesColumns holds the columns for the "task_types" table.
-	TaskTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
-		{Name: "title", Type: field.TypeString, Unique: true},
-	}
-	// TaskTypesTable holds the schema information for the "task_types" table.
-	TaskTypesTable = &schema.Table{
-		Name:        "task_types",
-		Columns:     TaskTypesColumns,
-		PrimaryKey:  []*schema.Column{TaskTypesColumns[0]},
+	// DetectionJobsTable holds the schema information for the "detection_jobs" table.
+	DetectionJobsTable = &schema.Table{
+		Name:        "detection_jobs",
+		Columns:     DetectionJobsColumns,
+		PrimaryKey:  []*schema.Column{DetectionJobsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
+	// DetectionJobInstancesColumns holds the columns for the "detection_job_instances" table.
+	DetectionJobInstancesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "username", Type: field.TypeString, Unique: true},
-		{Name: "email", Type: field.TypeString, Unique: true},
-		{Name: "password_hash", Type: field.TypeString},
-		{Name: "service", Type: field.TypeBool},
+		{Name: "type", Type: field.TypeString},
+		{Name: "value", Type: field.TypeFloat64},
+		{Name: "processed", Type: field.TypeBool},
+		{Name: "detection_job_instance", Type: field.TypeInt, Nullable: true},
 	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+	// DetectionJobInstancesTable holds the schema information for the "detection_job_instances" table.
+	DetectionJobInstancesTable = &schema.Table{
+		Name:       "detection_job_instances",
+		Columns:    DetectionJobInstancesColumns,
+		PrimaryKey: []*schema.Column{DetectionJobInstancesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "detection_job_instances_detection_jobs_instance",
+				Columns: []*schema.Column{DetectionJobInstancesColumns[6]},
+
+				RefColumns: []*schema.Column{DetectionJobsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ItemsTable,
-		SystemSummariesTable,
-		TasksTable,
-		TaskTypesTable,
-		UsersTable,
+		AnomaliesTable,
+		DetectionJobsTable,
+		DetectionJobInstancesTable,
 	}
 )
 
 func init() {
-	ItemsTable.ForeignKeys[0].RefTable = TasksTable
-	TasksTable.ForeignKeys[0].RefTable = TaskTypesTable
-	TasksTable.ForeignKeys[1].RefTable = UsersTable
+	AnomaliesTable.ForeignKeys[0].RefTable = DetectionJobInstancesTable
+	DetectionJobInstancesTable.ForeignKeys[0].RefTable = DetectionJobsTable
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/configs"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/logger"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 type Handler struct {
@@ -30,16 +29,9 @@ func NewHandler(
 }
 
 func (h *Handler) link(e *echo.Echo) {
-	e.POST("/getToken", h.GetTokenHandler)
-	e.POST("/createUser", h.CreateUserHandler)
-	e.POST("/getSystemSummary", h.GetSystemSummaryHandler)
-
-	// Restricted group
-	restricted := e.Group("/private")
-	restricted.Use(middleware.JWT([]byte(h.cfg.Auth.Secret)))
-	restricted.POST("/getUser", h.GetUserHandler)
-	restricted.POST("/createTask", h.CreateTaskHandler)
-	restricted.POST("/createItem", h.CreateItemHandler)
-	restricted.POST("/getTasks", h.GetTasksHandler)
-	restricted.POST("/updateTask", h.UpdateTaskHandler)
+	e.POST("/listJobs", h.ListJobsHandler)
+	e.POST("/addJob", h.AddJobHandler)
+	e.POST("/deleteJob", h.DeleteJobHandler)
+	e.POST("/listAnomalies", h.ListAnomaliesHandler)
+	e.POST("/setAnomalyStatus", h.SetAnomalyStatusHandler)
 }

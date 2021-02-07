@@ -9,15 +9,13 @@ import (
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/migrate"
 
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/item"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/systemsummary"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/task"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/tasktype"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/user"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/anomaly"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjob"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjobinstance"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -25,16 +23,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Item is the client for interacting with the Item builders.
-	Item *ItemClient
-	// SystemSummary is the client for interacting with the SystemSummary builders.
-	SystemSummary *SystemSummaryClient
-	// Task is the client for interacting with the Task builders.
-	Task *TaskClient
-	// TaskType is the client for interacting with the TaskType builders.
-	TaskType *TaskTypeClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Anomaly is the client for interacting with the Anomaly builders.
+	Anomaly *AnomalyClient
+	// DetectionJob is the client for interacting with the DetectionJob builders.
+	DetectionJob *DetectionJobClient
+	// DetectionJobInstance is the client for interacting with the DetectionJobInstance builders.
+	DetectionJobInstance *DetectionJobInstanceClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -48,11 +42,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Item = NewItemClient(c.config)
-	c.SystemSummary = NewSystemSummaryClient(c.config)
-	c.Task = NewTaskClient(c.config)
-	c.TaskType = NewTaskTypeClient(c.config)
-	c.User = NewUserClient(c.config)
+	c.Anomaly = NewAnomalyClient(c.config)
+	c.DetectionJob = NewDetectionJobClient(c.config)
+	c.DetectionJobInstance = NewDetectionJobInstanceClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -81,42 +73,42 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Item:          NewItemClient(cfg),
-		SystemSummary: NewSystemSummaryClient(cfg),
-		Task:          NewTaskClient(cfg),
-		TaskType:      NewTaskTypeClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		Anomaly:              NewAnomalyClient(cfg),
+		DetectionJob:         NewDetectionJobClient(cfg),
+		DetectionJobInstance: NewDetectionJobInstanceClient(cfg),
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:        cfg,
-		Item:          NewItemClient(cfg),
-		SystemSummary: NewSystemSummaryClient(cfg),
-		Task:          NewTaskClient(cfg),
-		TaskType:      NewTaskTypeClient(cfg),
-		User:          NewUserClient(cfg),
+		config:               cfg,
+		Anomaly:              NewAnomalyClient(cfg),
+		DetectionJob:         NewDetectionJobClient(cfg),
+		DetectionJobInstance: NewDetectionJobInstanceClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Item.
+//		Anomaly.
 //		Query().
 //		Count(ctx)
 //
@@ -124,7 +116,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -138,545 +131,335 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Item.Use(hooks...)
-	c.SystemSummary.Use(hooks...)
-	c.Task.Use(hooks...)
-	c.TaskType.Use(hooks...)
-	c.User.Use(hooks...)
+	c.Anomaly.Use(hooks...)
+	c.DetectionJob.Use(hooks...)
+	c.DetectionJobInstance.Use(hooks...)
 }
 
-// ItemClient is a client for the Item schema.
-type ItemClient struct {
+// AnomalyClient is a client for the Anomaly schema.
+type AnomalyClient struct {
 	config
 }
 
-// NewItemClient returns a client for the Item from the given config.
-func NewItemClient(c config) *ItemClient {
-	return &ItemClient{config: c}
+// NewAnomalyClient returns a client for the Anomaly from the given config.
+func NewAnomalyClient(c config) *AnomalyClient {
+	return &AnomalyClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `item.Hooks(f(g(h())))`.
-func (c *ItemClient) Use(hooks ...Hook) {
-	c.hooks.Item = append(c.hooks.Item, hooks...)
+// A call to `Use(f, g, h)` equals to `anomaly.Hooks(f(g(h())))`.
+func (c *AnomalyClient) Use(hooks ...Hook) {
+	c.hooks.Anomaly = append(c.hooks.Anomaly, hooks...)
 }
 
-// Create returns a create builder for Item.
-func (c *ItemClient) Create() *ItemCreate {
-	mutation := newItemMutation(c.config, OpCreate)
-	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Anomaly.
+func (c *AnomalyClient) Create() *AnomalyCreate {
+	mutation := newAnomalyMutation(c.config, OpCreate)
+	return &AnomalyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Item entities.
-func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
-	return &ItemCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Anomaly entities.
+func (c *AnomalyClient) CreateBulk(builders ...*AnomalyCreate) *AnomalyCreateBulk {
+	return &AnomalyCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Item.
-func (c *ItemClient) Update() *ItemUpdate {
-	mutation := newItemMutation(c.config, OpUpdate)
-	return &ItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Anomaly.
+func (c *AnomalyClient) Update() *AnomalyUpdate {
+	mutation := newAnomalyMutation(c.config, OpUpdate)
+	return &AnomalyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
-	mutation := newItemMutation(c.config, OpUpdateOne, withItem(i))
-	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AnomalyClient) UpdateOne(a *Anomaly) *AnomalyUpdateOne {
+	mutation := newAnomalyMutation(c.config, OpUpdateOne, withAnomaly(a))
+	return &AnomalyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ItemClient) UpdateOneID(id int) *ItemUpdateOne {
-	mutation := newItemMutation(c.config, OpUpdateOne, withItemID(id))
-	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AnomalyClient) UpdateOneID(id int) *AnomalyUpdateOne {
+	mutation := newAnomalyMutation(c.config, OpUpdateOne, withAnomalyID(id))
+	return &AnomalyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Item.
-func (c *ItemClient) Delete() *ItemDelete {
-	mutation := newItemMutation(c.config, OpDelete)
-	return &ItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Anomaly.
+func (c *AnomalyClient) Delete() *AnomalyDelete {
+	mutation := newAnomalyMutation(c.config, OpDelete)
+	return &AnomalyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *ItemClient) DeleteOne(i *Item) *ItemDeleteOne {
-	return c.DeleteOneID(i.ID)
+func (c *AnomalyClient) DeleteOne(a *Anomaly) *AnomalyDeleteOne {
+	return c.DeleteOneID(a.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
-	builder := c.Delete().Where(item.ID(id))
+func (c *AnomalyClient) DeleteOneID(id int) *AnomalyDeleteOne {
+	builder := c.Delete().Where(anomaly.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &ItemDeleteOne{builder}
+	return &AnomalyDeleteOne{builder}
 }
 
-// Query returns a query builder for Item.
-func (c *ItemClient) Query() *ItemQuery {
-	return &ItemQuery{config: c.config}
+// Query returns a query builder for Anomaly.
+func (c *AnomalyClient) Query() *AnomalyQuery {
+	return &AnomalyQuery{config: c.config}
 }
 
-// Get returns a Item entity by its id.
-func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
-	return c.Query().Where(item.ID(id)).Only(ctx)
+// Get returns a Anomaly entity by its id.
+func (c *AnomalyClient) Get(ctx context.Context, id int) (*Anomaly, error) {
+	return c.Query().Where(anomaly.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
-	i, err := c.Get(ctx, id)
+func (c *AnomalyClient) GetX(ctx context.Context, id int) *Anomaly {
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return obj
 }
 
-// QueryTask queries the task edge of a Item.
-func (c *ItemClient) QueryTask(i *Item) *TaskQuery {
-	query := &TaskQuery{config: c.config}
+// QueryDetectionJobInstance queries the detection_job_instance edge of a Anomaly.
+func (c *AnomalyClient) QueryDetectionJobInstance(a *Anomaly) *DetectionJobInstanceQuery {
+	query := &DetectionJobInstanceQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
+		id := a.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(item.Table, item.FieldID, id),
-			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, item.TaskTable, item.TaskColumn),
+			sqlgraph.From(anomaly.Table, anomaly.FieldID, id),
+			sqlgraph.To(detectionjobinstance.Table, detectionjobinstance.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, anomaly.DetectionJobInstanceTable, anomaly.DetectionJobInstanceColumn),
 		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *ItemClient) Hooks() []Hook {
-	return c.hooks.Item
+func (c *AnomalyClient) Hooks() []Hook {
+	return c.hooks.Anomaly
 }
 
-// SystemSummaryClient is a client for the SystemSummary schema.
-type SystemSummaryClient struct {
+// DetectionJobClient is a client for the DetectionJob schema.
+type DetectionJobClient struct {
 	config
 }
 
-// NewSystemSummaryClient returns a client for the SystemSummary from the given config.
-func NewSystemSummaryClient(c config) *SystemSummaryClient {
-	return &SystemSummaryClient{config: c}
+// NewDetectionJobClient returns a client for the DetectionJob from the given config.
+func NewDetectionJobClient(c config) *DetectionJobClient {
+	return &DetectionJobClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `systemsummary.Hooks(f(g(h())))`.
-func (c *SystemSummaryClient) Use(hooks ...Hook) {
-	c.hooks.SystemSummary = append(c.hooks.SystemSummary, hooks...)
+// A call to `Use(f, g, h)` equals to `detectionjob.Hooks(f(g(h())))`.
+func (c *DetectionJobClient) Use(hooks ...Hook) {
+	c.hooks.DetectionJob = append(c.hooks.DetectionJob, hooks...)
 }
 
-// Create returns a create builder for SystemSummary.
-func (c *SystemSummaryClient) Create() *SystemSummaryCreate {
-	mutation := newSystemSummaryMutation(c.config, OpCreate)
-	return &SystemSummaryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for DetectionJob.
+func (c *DetectionJobClient) Create() *DetectionJobCreate {
+	mutation := newDetectionJobMutation(c.config, OpCreate)
+	return &DetectionJobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of SystemSummary entities.
-func (c *SystemSummaryClient) CreateBulk(builders ...*SystemSummaryCreate) *SystemSummaryCreateBulk {
-	return &SystemSummaryCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of DetectionJob entities.
+func (c *DetectionJobClient) CreateBulk(builders ...*DetectionJobCreate) *DetectionJobCreateBulk {
+	return &DetectionJobCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for SystemSummary.
-func (c *SystemSummaryClient) Update() *SystemSummaryUpdate {
-	mutation := newSystemSummaryMutation(c.config, OpUpdate)
-	return &SystemSummaryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SystemSummaryClient) UpdateOne(ss *SystemSummary) *SystemSummaryUpdateOne {
-	mutation := newSystemSummaryMutation(c.config, OpUpdateOne, withSystemSummary(ss))
-	return &SystemSummaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SystemSummaryClient) UpdateOneID(id int) *SystemSummaryUpdateOne {
-	mutation := newSystemSummaryMutation(c.config, OpUpdateOne, withSystemSummaryID(id))
-	return &SystemSummaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for SystemSummary.
-func (c *SystemSummaryClient) Delete() *SystemSummaryDelete {
-	mutation := newSystemSummaryMutation(c.config, OpDelete)
-	return &SystemSummaryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *SystemSummaryClient) DeleteOne(ss *SystemSummary) *SystemSummaryDeleteOne {
-	return c.DeleteOneID(ss.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *SystemSummaryClient) DeleteOneID(id int) *SystemSummaryDeleteOne {
-	builder := c.Delete().Where(systemsummary.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SystemSummaryDeleteOne{builder}
-}
-
-// Query returns a query builder for SystemSummary.
-func (c *SystemSummaryClient) Query() *SystemSummaryQuery {
-	return &SystemSummaryQuery{config: c.config}
-}
-
-// Get returns a SystemSummary entity by its id.
-func (c *SystemSummaryClient) Get(ctx context.Context, id int) (*SystemSummary, error) {
-	return c.Query().Where(systemsummary.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SystemSummaryClient) GetX(ctx context.Context, id int) *SystemSummary {
-	ss, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return ss
-}
-
-// Hooks returns the client hooks.
-func (c *SystemSummaryClient) Hooks() []Hook {
-	return c.hooks.SystemSummary
-}
-
-// TaskClient is a client for the Task schema.
-type TaskClient struct {
-	config
-}
-
-// NewTaskClient returns a client for the Task from the given config.
-func NewTaskClient(c config) *TaskClient {
-	return &TaskClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `task.Hooks(f(g(h())))`.
-func (c *TaskClient) Use(hooks ...Hook) {
-	c.hooks.Task = append(c.hooks.Task, hooks...)
-}
-
-// Create returns a create builder for Task.
-func (c *TaskClient) Create() *TaskCreate {
-	mutation := newTaskMutation(c.config, OpCreate)
-	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of Task entities.
-func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
-	return &TaskCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Task.
-func (c *TaskClient) Update() *TaskUpdate {
-	mutation := newTaskMutation(c.config, OpUpdate)
-	return &TaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for DetectionJob.
+func (c *DetectionJobClient) Update() *DetectionJobUpdate {
+	mutation := newDetectionJobMutation(c.config, OpUpdate)
+	return &DetectionJobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TaskClient) UpdateOne(t *Task) *TaskUpdateOne {
-	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(t))
-	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DetectionJobClient) UpdateOne(dj *DetectionJob) *DetectionJobUpdateOne {
+	mutation := newDetectionJobMutation(c.config, OpUpdateOne, withDetectionJob(dj))
+	return &DetectionJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TaskClient) UpdateOneID(id int) *TaskUpdateOne {
-	mutation := newTaskMutation(c.config, OpUpdateOne, withTaskID(id))
-	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DetectionJobClient) UpdateOneID(id int) *DetectionJobUpdateOne {
+	mutation := newDetectionJobMutation(c.config, OpUpdateOne, withDetectionJobID(id))
+	return &DetectionJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Task.
-func (c *TaskClient) Delete() *TaskDelete {
-	mutation := newTaskMutation(c.config, OpDelete)
-	return &TaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for DetectionJob.
+func (c *DetectionJobClient) Delete() *DetectionJobDelete {
+	mutation := newDetectionJobMutation(c.config, OpDelete)
+	return &DetectionJobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
-	return c.DeleteOneID(t.ID)
+func (c *DetectionJobClient) DeleteOne(dj *DetectionJob) *DetectionJobDeleteOne {
+	return c.DeleteOneID(dj.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
-	builder := c.Delete().Where(task.ID(id))
+func (c *DetectionJobClient) DeleteOneID(id int) *DetectionJobDeleteOne {
+	builder := c.Delete().Where(detectionjob.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &TaskDeleteOne{builder}
+	return &DetectionJobDeleteOne{builder}
 }
 
-// Query returns a query builder for Task.
-func (c *TaskClient) Query() *TaskQuery {
-	return &TaskQuery{config: c.config}
+// Query returns a query builder for DetectionJob.
+func (c *DetectionJobClient) Query() *DetectionJobQuery {
+	return &DetectionJobQuery{config: c.config}
 }
 
-// Get returns a Task entity by its id.
-func (c *TaskClient) Get(ctx context.Context, id int) (*Task, error) {
-	return c.Query().Where(task.ID(id)).Only(ctx)
+// Get returns a DetectionJob entity by its id.
+func (c *DetectionJobClient) Get(ctx context.Context, id int) (*DetectionJob, error) {
+	return c.Query().Where(detectionjob.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
-	t, err := c.Get(ctx, id)
+func (c *DetectionJobClient) GetX(ctx context.Context, id int) *DetectionJob {
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return obj
 }
 
-// QueryItems queries the items edge of a Task.
-func (c *TaskClient) QueryItems(t *Task) *ItemQuery {
-	query := &ItemQuery{config: c.config}
+// QueryInstance queries the instance edge of a DetectionJob.
+func (c *DetectionJobClient) QueryInstance(dj *DetectionJob) *DetectionJobInstanceQuery {
+	query := &DetectionJobInstanceQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
+		id := dj.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(task.Table, task.FieldID, id),
-			sqlgraph.To(item.Table, item.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, task.ItemsTable, task.ItemsColumn),
+			sqlgraph.From(detectionjob.Table, detectionjob.FieldID, id),
+			sqlgraph.To(detectionjobinstance.Table, detectionjobinstance.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, detectionjob.InstanceTable, detectionjob.InstanceColumn),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUser queries the user edge of a Task.
-func (c *TaskClient) QueryUser(t *Task) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(task.Table, task.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, task.UserTable, task.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryType queries the type edge of a Task.
-func (c *TaskClient) QueryType(t *Task) *TaskTypeQuery {
-	query := &TaskTypeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(task.Table, task.FieldID, id),
-			sqlgraph.To(tasktype.Table, tasktype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, task.TypeTable, task.TypeColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(dj.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *TaskClient) Hooks() []Hook {
-	return c.hooks.Task
+func (c *DetectionJobClient) Hooks() []Hook {
+	return c.hooks.DetectionJob
 }
 
-// TaskTypeClient is a client for the TaskType schema.
-type TaskTypeClient struct {
+// DetectionJobInstanceClient is a client for the DetectionJobInstance schema.
+type DetectionJobInstanceClient struct {
 	config
 }
 
-// NewTaskTypeClient returns a client for the TaskType from the given config.
-func NewTaskTypeClient(c config) *TaskTypeClient {
-	return &TaskTypeClient{config: c}
+// NewDetectionJobInstanceClient returns a client for the DetectionJobInstance from the given config.
+func NewDetectionJobInstanceClient(c config) *DetectionJobInstanceClient {
+	return &DetectionJobInstanceClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `tasktype.Hooks(f(g(h())))`.
-func (c *TaskTypeClient) Use(hooks ...Hook) {
-	c.hooks.TaskType = append(c.hooks.TaskType, hooks...)
+// A call to `Use(f, g, h)` equals to `detectionjobinstance.Hooks(f(g(h())))`.
+func (c *DetectionJobInstanceClient) Use(hooks ...Hook) {
+	c.hooks.DetectionJobInstance = append(c.hooks.DetectionJobInstance, hooks...)
 }
 
-// Create returns a create builder for TaskType.
-func (c *TaskTypeClient) Create() *TaskTypeCreate {
-	mutation := newTaskTypeMutation(c.config, OpCreate)
-	return &TaskTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for DetectionJobInstance.
+func (c *DetectionJobInstanceClient) Create() *DetectionJobInstanceCreate {
+	mutation := newDetectionJobInstanceMutation(c.config, OpCreate)
+	return &DetectionJobInstanceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of TaskType entities.
-func (c *TaskTypeClient) CreateBulk(builders ...*TaskTypeCreate) *TaskTypeCreateBulk {
-	return &TaskTypeCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of DetectionJobInstance entities.
+func (c *DetectionJobInstanceClient) CreateBulk(builders ...*DetectionJobInstanceCreate) *DetectionJobInstanceCreateBulk {
+	return &DetectionJobInstanceCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for TaskType.
-func (c *TaskTypeClient) Update() *TaskTypeUpdate {
-	mutation := newTaskTypeMutation(c.config, OpUpdate)
-	return &TaskTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for DetectionJobInstance.
+func (c *DetectionJobInstanceClient) Update() *DetectionJobInstanceUpdate {
+	mutation := newDetectionJobInstanceMutation(c.config, OpUpdate)
+	return &DetectionJobInstanceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TaskTypeClient) UpdateOne(tt *TaskType) *TaskTypeUpdateOne {
-	mutation := newTaskTypeMutation(c.config, OpUpdateOne, withTaskType(tt))
-	return &TaskTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DetectionJobInstanceClient) UpdateOne(dji *DetectionJobInstance) *DetectionJobInstanceUpdateOne {
+	mutation := newDetectionJobInstanceMutation(c.config, OpUpdateOne, withDetectionJobInstance(dji))
+	return &DetectionJobInstanceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TaskTypeClient) UpdateOneID(id int) *TaskTypeUpdateOne {
-	mutation := newTaskTypeMutation(c.config, OpUpdateOne, withTaskTypeID(id))
-	return &TaskTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DetectionJobInstanceClient) UpdateOneID(id int) *DetectionJobInstanceUpdateOne {
+	mutation := newDetectionJobInstanceMutation(c.config, OpUpdateOne, withDetectionJobInstanceID(id))
+	return &DetectionJobInstanceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for TaskType.
-func (c *TaskTypeClient) Delete() *TaskTypeDelete {
-	mutation := newTaskTypeMutation(c.config, OpDelete)
-	return &TaskTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for DetectionJobInstance.
+func (c *DetectionJobInstanceClient) Delete() *DetectionJobInstanceDelete {
+	mutation := newDetectionJobInstanceMutation(c.config, OpDelete)
+	return &DetectionJobInstanceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *TaskTypeClient) DeleteOne(tt *TaskType) *TaskTypeDeleteOne {
-	return c.DeleteOneID(tt.ID)
+func (c *DetectionJobInstanceClient) DeleteOne(dji *DetectionJobInstance) *DetectionJobInstanceDeleteOne {
+	return c.DeleteOneID(dji.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TaskTypeClient) DeleteOneID(id int) *TaskTypeDeleteOne {
-	builder := c.Delete().Where(tasktype.ID(id))
+func (c *DetectionJobInstanceClient) DeleteOneID(id int) *DetectionJobInstanceDeleteOne {
+	builder := c.Delete().Where(detectionjobinstance.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &TaskTypeDeleteOne{builder}
+	return &DetectionJobInstanceDeleteOne{builder}
 }
 
-// Query returns a query builder for TaskType.
-func (c *TaskTypeClient) Query() *TaskTypeQuery {
-	return &TaskTypeQuery{config: c.config}
+// Query returns a query builder for DetectionJobInstance.
+func (c *DetectionJobInstanceClient) Query() *DetectionJobInstanceQuery {
+	return &DetectionJobInstanceQuery{config: c.config}
 }
 
-// Get returns a TaskType entity by its id.
-func (c *TaskTypeClient) Get(ctx context.Context, id int) (*TaskType, error) {
-	return c.Query().Where(tasktype.ID(id)).Only(ctx)
+// Get returns a DetectionJobInstance entity by its id.
+func (c *DetectionJobInstanceClient) Get(ctx context.Context, id int) (*DetectionJobInstance, error) {
+	return c.Query().Where(detectionjobinstance.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TaskTypeClient) GetX(ctx context.Context, id int) *TaskType {
-	tt, err := c.Get(ctx, id)
+func (c *DetectionJobInstanceClient) GetX(ctx context.Context, id int) *DetectionJobInstance {
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return tt
+	return obj
 }
 
-// QueryTasks queries the tasks edge of a TaskType.
-func (c *TaskTypeClient) QueryTasks(tt *TaskType) *TaskQuery {
-	query := &TaskQuery{config: c.config}
+// QueryAnomalies queries the anomalies edge of a DetectionJobInstance.
+func (c *DetectionJobInstanceClient) QueryAnomalies(dji *DetectionJobInstance) *AnomalyQuery {
+	query := &AnomalyQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := tt.ID
+		id := dji.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(tasktype.Table, tasktype.FieldID, id),
-			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tasktype.TasksTable, tasktype.TasksColumn),
+			sqlgraph.From(detectionjobinstance.Table, detectionjobinstance.FieldID, id),
+			sqlgraph.To(anomaly.Table, anomaly.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, detectionjobinstance.AnomaliesTable, detectionjobinstance.AnomaliesColumn),
 		)
-		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(dji.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDetectionJob queries the detection_job edge of a DetectionJobInstance.
+func (c *DetectionJobInstanceClient) QueryDetectionJob(dji *DetectionJobInstance) *DetectionJobQuery {
+	query := &DetectionJobQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dji.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(detectionjobinstance.Table, detectionjobinstance.FieldID, id),
+			sqlgraph.To(detectionjob.Table, detectionjob.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, detectionjobinstance.DetectionJobTable, detectionjobinstance.DetectionJobColumn),
+		)
+		fromV = sqlgraph.Neighbors(dji.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *TaskTypeClient) Hooks() []Hook {
-	return c.hooks.TaskType
-}
-
-// UserClient is a client for the User schema.
-type UserClient struct {
-	config
-}
-
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
-}
-
-// Create returns a create builder for User.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
-}
-
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
-}
-
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return u
-}
-
-// QueryTasks queries the tasks edge of a User.
-func (c *UserClient) QueryTasks(u *User) *TaskQuery {
-	query := &TaskQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TasksTable, user.TasksColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+func (c *DetectionJobInstanceClient) Hooks() []Hook {
+	return c.hooks.DetectionJobInstance
 }

@@ -6,22 +6,18 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Item is the client for interacting with the Item builders.
-	Item *ItemClient
-	// SystemSummary is the client for interacting with the SystemSummary builders.
-	SystemSummary *SystemSummaryClient
-	// Task is the client for interacting with the Task builders.
-	Task *TaskClient
-	// TaskType is the client for interacting with the TaskType builders.
-	TaskType *TaskTypeClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Anomaly is the client for interacting with the Anomaly builders.
+	Anomaly *AnomalyClient
+	// DetectionJob is the client for interacting with the DetectionJob builders.
+	DetectionJob *DetectionJobClient
+	// DetectionJobInstance is the client for interacting with the DetectionJobInstance builders.
+	DetectionJobInstance *DetectionJobInstanceClient
 
 	// lazily loaded.
 	client     *Client
@@ -157,11 +153,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Item = NewItemClient(tx.config)
-	tx.SystemSummary = NewSystemSummaryClient(tx.config)
-	tx.Task = NewTaskClient(tx.config)
-	tx.TaskType = NewTaskTypeClient(tx.config)
-	tx.User = NewUserClient(tx.config)
+	tx.Anomaly = NewAnomalyClient(tx.config)
+	tx.DetectionJob = NewDetectionJobClient(tx.config)
+	tx.DetectionJobInstance = NewDetectionJobInstanceClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -171,7 +165,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Item.QueryXXX(), the query will be executed
+// applies a query, for example: Anomaly.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

@@ -3,20 +3,14 @@
 package predicate
 
 import (
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 )
 
-// Item is the predicate function for item builders.
-type Item func(*sql.Selector)
+// Anomaly is the predicate function for anomaly builders.
+type Anomaly func(*sql.Selector)
 
-// SystemSummary is the predicate function for systemsummary builders.
-type SystemSummary func(*sql.Selector)
+// DetectionJob is the predicate function for detectionjob builders.
+type DetectionJob func(*sql.Selector)
 
-// Task is the predicate function for task builders.
-type Task func(*sql.Selector)
-
-// TaskType is the predicate function for tasktype builders.
-type TaskType func(*sql.Selector)
-
-// User is the predicate function for user builders.
-type User func(*sql.Selector)
+// DetectionJobInstance is the predicate function for detectionjobinstance builders.
+type DetectionJobInstance func(*sql.Selector)

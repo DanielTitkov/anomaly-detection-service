@@ -5,6 +5,6 @@ package runtime
 // The schema-stitching logic is generated in github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/runtime.go
 
 const (
-	Version = "v0.4.2"                                          // Version of ent codegen.
-	Sum     = "h1:JzU5dYJH9XdjfIKgOiPPK3szkqLqcdPWgVder4Ogows=" // Sum of ent codegen.
+	Version = "v0.6.0"                                          // Version of ent codegen.
+	Sum     = "h1:oo/a8sXPQKzHYFlVwmwOnyzBy+u8FWQsoLLqFCrOBt0=" // Sum of ent codegen.
 )

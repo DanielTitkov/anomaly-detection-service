@@ -1,7 +1,7 @@
 APP := app
 
 .PHONY: dev
-run: entgen
+dev: entgen
 	go run cmd/$(APP)/main.go
 
 .PHONY: db
