@@ -38,10 +38,12 @@ func NewApp(
 	cfg configs.Config,
 	logger *logger.Logger,
 	repo Repository,
+	notificationService Notifier,
 ) *App {
 	return &App{
-		cfg:    cfg,
-		logger: logger,
-		repo:   repo,
+		cfg:                 cfg,
+		logger:              logger,
+		repo:                repo,
+		notificationService: notificationService,
 	}
 }
