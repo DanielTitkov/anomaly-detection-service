@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/configs"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/logger"
 )
 
@@ -12,27 +13,16 @@ type (
 		repo   Repository
 	}
 	Repository interface {
-		// // users
-		// CreateUser(*domain.User) (*domain.User, error)
-		// GetUserByUsername(username string) (*domain.User, error)
-		// GetUserCount() (int, error)
+		// anomalies
+		CreateAnomaly(*domain.Anomaly) (*domain.Anomaly, error)
+		FilterAnomalies(*domain.FilterAnomaliesArgs) ([]*domain.Anomaly, error)
+		SetAnomalyStatus(anomalyID int, processed bool, status string) error
 
-		// // tasks
-		// CreateTask(*domain.Task, *domain.User, *domain.TaskType) (*domain.Task, error)
-		// UpdateTask(*domain.Task) (*domain.Task, error)
-		// GetTasks(*domain.User) ([]*domain.Task, error)
-		// GetTasksWithItems(u *domain.User, itemLimit int) ([]*domain.Task, error)
-		// GetTaskByCode(code string) (*domain.Task, error)
-		// GetTaskTypeByCode(code string) (*domain.TaskType, error)
-		// GetTaskCount(active bool) (int, error)
-
-		// // items
-		// CreateItem(*domain.Item, *domain.Task) (*domain.Item, error)
-		// GetItemCount() (int, error)
-
-		// // system summary
-		// CreateSystemSummary(s *domain.SystemSymmary) (*domain.SystemSymmary, error)
-		// GetLatestSystemSummary() (*domain.SystemSymmary, error)
+		// detection jobs
+		CreateDetectionJob(*domain.DetectionJob) (*domain.DetectionJob, error)
+		DeleteDetectionJobByID(int) error
+		FilterDetectionJobs(*domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error)
+		CreateDetectionInstanceJob(*domain.DetectionJobInstance) (*domain.DetectionJobInstance, error)
 	}
 )
 
