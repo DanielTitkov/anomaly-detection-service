@@ -18,7 +18,7 @@ type (
 		// anomalies
 		CreateAnomaly(*domain.Anomaly) (*domain.Anomaly, error)
 		FilterAnomalies(*domain.FilterAnomaliesArgs) ([]*domain.Anomaly, error)
-		SetAnomalyStatus(anomalyID int, processed bool, status string) error
+		SetAnomalyStatus(anomalyID int, processed bool) error
 
 		// detection jobs
 		CreateDetectionJob(*domain.DetectionJob) (*domain.DetectionJob, error)
@@ -27,10 +27,13 @@ type (
 		CreateDetectionInstanceJob(*domain.DetectionJobInstance) (*domain.DetectionJobInstance, error)
 	}
 	DatasetFetcher interface {
-		Fetch(*domain.FetchDatasetArgs) (*domain.Dataset, error)
+		Fetch(*domain.DetectionJob) (*domain.Dataset, error)
 	}
 	Notifier interface {
 		Notify(*domain.Notification) error
+	}
+	Analyzer interface {
+		FindOutliers(*domain.Dataset, *domain.DetectionJob) ([]*domain.Anomaly, error)
 	}
 )
 

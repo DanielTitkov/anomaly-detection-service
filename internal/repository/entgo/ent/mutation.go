@@ -42,6 +42,8 @@ type AnomalyMutation struct {
 	value                         *float64
 	addvalue                      *float64
 	processed                     *bool
+	period_start                  *time.Time
+	period_end                    *time.Time
 	clearedFields                 map[string]struct{}
 	detection_job_instance        *int
 	cleareddetection_job_instance bool
@@ -329,6 +331,78 @@ func (m *AnomalyMutation) ResetProcessed() {
 	m.processed = nil
 }
 
+// SetPeriodStart sets the "period_start" field.
+func (m *AnomalyMutation) SetPeriodStart(t time.Time) {
+	m.period_start = &t
+}
+
+// PeriodStart returns the value of the "period_start" field in the mutation.
+func (m *AnomalyMutation) PeriodStart() (r time.Time, exists bool) {
+	v := m.period_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeriodStart returns the old "period_start" field's value of the Anomaly entity.
+// If the Anomaly object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnomalyMutation) OldPeriodStart(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPeriodStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPeriodStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeriodStart: %w", err)
+	}
+	return oldValue.PeriodStart, nil
+}
+
+// ResetPeriodStart resets all changes to the "period_start" field.
+func (m *AnomalyMutation) ResetPeriodStart() {
+	m.period_start = nil
+}
+
+// SetPeriodEnd sets the "period_end" field.
+func (m *AnomalyMutation) SetPeriodEnd(t time.Time) {
+	m.period_end = &t
+}
+
+// PeriodEnd returns the value of the "period_end" field in the mutation.
+func (m *AnomalyMutation) PeriodEnd() (r time.Time, exists bool) {
+	v := m.period_end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeriodEnd returns the old "period_end" field's value of the Anomaly entity.
+// If the Anomaly object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnomalyMutation) OldPeriodEnd(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPeriodEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPeriodEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeriodEnd: %w", err)
+	}
+	return oldValue.PeriodEnd, nil
+}
+
+// ResetPeriodEnd resets all changes to the "period_end" field.
+func (m *AnomalyMutation) ResetPeriodEnd() {
+	m.period_end = nil
+}
+
 // SetDetectionJobInstanceID sets the "detection_job_instance" edge to the DetectionJobInstance entity by id.
 func (m *AnomalyMutation) SetDetectionJobInstanceID(id int) {
 	m.detection_job_instance = &id
@@ -382,7 +456,7 @@ func (m *AnomalyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AnomalyMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
 	if m.create_time != nil {
 		fields = append(fields, anomaly.FieldCreateTime)
 	}
@@ -397,6 +471,12 @@ func (m *AnomalyMutation) Fields() []string {
 	}
 	if m.processed != nil {
 		fields = append(fields, anomaly.FieldProcessed)
+	}
+	if m.period_start != nil {
+		fields = append(fields, anomaly.FieldPeriodStart)
+	}
+	if m.period_end != nil {
+		fields = append(fields, anomaly.FieldPeriodEnd)
 	}
 	return fields
 }
@@ -416,6 +496,10 @@ func (m *AnomalyMutation) Field(name string) (ent.Value, bool) {
 		return m.Value()
 	case anomaly.FieldProcessed:
 		return m.Processed()
+	case anomaly.FieldPeriodStart:
+		return m.PeriodStart()
+	case anomaly.FieldPeriodEnd:
+		return m.PeriodEnd()
 	}
 	return nil, false
 }
@@ -435,6 +519,10 @@ func (m *AnomalyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldValue(ctx)
 	case anomaly.FieldProcessed:
 		return m.OldProcessed(ctx)
+	case anomaly.FieldPeriodStart:
+		return m.OldPeriodStart(ctx)
+	case anomaly.FieldPeriodEnd:
+		return m.OldPeriodEnd(ctx)
 	}
 	return nil, fmt.Errorf("unknown Anomaly field %s", name)
 }
@@ -478,6 +566,20 @@ func (m *AnomalyMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProcessed(v)
+		return nil
+	case anomaly.FieldPeriodStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeriodStart(v)
+		return nil
+	case anomaly.FieldPeriodEnd:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeriodEnd(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Anomaly field %s", name)
@@ -557,6 +659,12 @@ func (m *AnomalyMutation) ResetField(name string) error {
 		return nil
 	case anomaly.FieldProcessed:
 		m.ResetProcessed()
+		return nil
+	case anomaly.FieldPeriodStart:
+		m.ResetPeriodStart()
+		return nil
+	case anomaly.FieldPeriodEnd:
+		m.ResetPeriodEnd()
 		return nil
 	}
 	return fmt.Errorf("unknown Anomaly field %s", name)
@@ -651,6 +759,8 @@ type DetectionJobMutation struct {
 	site_id         *string
 	metric          *string
 	attribute       *string
+	time_ago        *string
+	time_step       *string
 	description     *string
 	clearedFields   map[string]struct{}
 	instance        map[int]struct{}
@@ -1005,6 +1115,78 @@ func (m *DetectionJobMutation) ResetAttribute() {
 	m.attribute = nil
 }
 
+// SetTimeAgo sets the "time_ago" field.
+func (m *DetectionJobMutation) SetTimeAgo(s string) {
+	m.time_ago = &s
+}
+
+// TimeAgo returns the value of the "time_ago" field in the mutation.
+func (m *DetectionJobMutation) TimeAgo() (r string, exists bool) {
+	v := m.time_ago
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeAgo returns the old "time_ago" field's value of the DetectionJob entity.
+// If the DetectionJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DetectionJobMutation) OldTimeAgo(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTimeAgo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTimeAgo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeAgo: %w", err)
+	}
+	return oldValue.TimeAgo, nil
+}
+
+// ResetTimeAgo resets all changes to the "time_ago" field.
+func (m *DetectionJobMutation) ResetTimeAgo() {
+	m.time_ago = nil
+}
+
+// SetTimeStep sets the "time_step" field.
+func (m *DetectionJobMutation) SetTimeStep(s string) {
+	m.time_step = &s
+}
+
+// TimeStep returns the value of the "time_step" field in the mutation.
+func (m *DetectionJobMutation) TimeStep() (r string, exists bool) {
+	v := m.time_step
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeStep returns the old "time_step" field's value of the DetectionJob entity.
+// If the DetectionJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DetectionJobMutation) OldTimeStep(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTimeStep is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTimeStep requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeStep: %w", err)
+	}
+	return oldValue.TimeStep, nil
+}
+
+// ResetTimeStep resets all changes to the "time_step" field.
+func (m *DetectionJobMutation) ResetTimeStep() {
+	m.time_step = nil
+}
+
 // SetDescription sets the "description" field.
 func (m *DetectionJobMutation) SetDescription(s string) {
 	m.description = &s
@@ -1121,7 +1303,7 @@ func (m *DetectionJobMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DetectionJobMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.create_time != nil {
 		fields = append(fields, detectionjob.FieldCreateTime)
 	}
@@ -1142,6 +1324,12 @@ func (m *DetectionJobMutation) Fields() []string {
 	}
 	if m.attribute != nil {
 		fields = append(fields, detectionjob.FieldAttribute)
+	}
+	if m.time_ago != nil {
+		fields = append(fields, detectionjob.FieldTimeAgo)
+	}
+	if m.time_step != nil {
+		fields = append(fields, detectionjob.FieldTimeStep)
 	}
 	if m.description != nil {
 		fields = append(fields, detectionjob.FieldDescription)
@@ -1168,6 +1356,10 @@ func (m *DetectionJobMutation) Field(name string) (ent.Value, bool) {
 		return m.Metric()
 	case detectionjob.FieldAttribute:
 		return m.Attribute()
+	case detectionjob.FieldTimeAgo:
+		return m.TimeAgo()
+	case detectionjob.FieldTimeStep:
+		return m.TimeStep()
 	case detectionjob.FieldDescription:
 		return m.Description()
 	}
@@ -1193,6 +1385,10 @@ func (m *DetectionJobMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldMetric(ctx)
 	case detectionjob.FieldAttribute:
 		return m.OldAttribute(ctx)
+	case detectionjob.FieldTimeAgo:
+		return m.OldTimeAgo(ctx)
+	case detectionjob.FieldTimeStep:
+		return m.OldTimeStep(ctx)
 	case detectionjob.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -1252,6 +1448,20 @@ func (m *DetectionJobMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAttribute(v)
+		return nil
+	case detectionjob.FieldTimeAgo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeAgo(v)
+		return nil
+	case detectionjob.FieldTimeStep:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeStep(v)
 		return nil
 	case detectionjob.FieldDescription:
 		v, ok := value.(string)
@@ -1344,6 +1554,12 @@ func (m *DetectionJobMutation) ResetField(name string) error {
 		return nil
 	case detectionjob.FieldAttribute:
 		m.ResetAttribute()
+		return nil
+	case detectionjob.FieldTimeAgo:
+		m.ResetTimeAgo()
+		return nil
+	case detectionjob.FieldTimeStep:
+		m.ResetTimeStep()
 		return nil
 	case detectionjob.FieldDescription:
 		m.ResetDescription()
@@ -1444,10 +1660,7 @@ type DetectionJobInstanceMutation struct {
 	id                   *int
 	create_time          *time.Time
 	update_time          *time.Time
-	_type                *string
-	value                *float64
-	addvalue             *float64
-	processed            *bool
+	finished_at          *time.Time
 	clearedFields        map[string]struct{}
 	anomalies            map[int]struct{}
 	removedanomalies     map[int]struct{}
@@ -1610,132 +1823,53 @@ func (m *DetectionJobInstanceMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
 
-// SetType sets the "type" field.
-func (m *DetectionJobInstanceMutation) SetType(s string) {
-	m._type = &s
+// SetFinishedAt sets the "finished_at" field.
+func (m *DetectionJobInstanceMutation) SetFinishedAt(t time.Time) {
+	m.finished_at = &t
 }
 
-// GetType returns the value of the "type" field in the mutation.
-func (m *DetectionJobInstanceMutation) GetType() (r string, exists bool) {
-	v := m._type
+// FinishedAt returns the value of the "finished_at" field in the mutation.
+func (m *DetectionJobInstanceMutation) FinishedAt() (r time.Time, exists bool) {
+	v := m.finished_at
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldType returns the old "type" field's value of the DetectionJobInstance entity.
+// OldFinishedAt returns the old "finished_at" field's value of the DetectionJobInstance entity.
 // If the DetectionJobInstance object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetectionJobInstanceMutation) OldType(ctx context.Context) (v string, err error) {
+func (m *DetectionJobInstanceMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldType is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldFinishedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldType requires an ID field in the mutation")
+		return v, fmt.Errorf("OldFinishedAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
+		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
 	}
-	return oldValue.Type, nil
+	return oldValue.FinishedAt, nil
 }
 
-// ResetType resets all changes to the "type" field.
-func (m *DetectionJobInstanceMutation) ResetType() {
-	m._type = nil
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *DetectionJobInstanceMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[detectionjobinstance.FieldFinishedAt] = struct{}{}
 }
 
-// SetValue sets the "value" field.
-func (m *DetectionJobInstanceMutation) SetValue(f float64) {
-	m.value = &f
-	m.addvalue = nil
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *DetectionJobInstanceMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[detectionjobinstance.FieldFinishedAt]
+	return ok
 }
 
-// Value returns the value of the "value" field in the mutation.
-func (m *DetectionJobInstanceMutation) Value() (r float64, exists bool) {
-	v := m.value
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldValue returns the old "value" field's value of the DetectionJobInstance entity.
-// If the DetectionJobInstance object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetectionJobInstanceMutation) OldValue(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldValue is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldValue requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValue: %w", err)
-	}
-	return oldValue.Value, nil
-}
-
-// AddValue adds f to the "value" field.
-func (m *DetectionJobInstanceMutation) AddValue(f float64) {
-	if m.addvalue != nil {
-		*m.addvalue += f
-	} else {
-		m.addvalue = &f
-	}
-}
-
-// AddedValue returns the value that was added to the "value" field in this mutation.
-func (m *DetectionJobInstanceMutation) AddedValue() (r float64, exists bool) {
-	v := m.addvalue
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetValue resets all changes to the "value" field.
-func (m *DetectionJobInstanceMutation) ResetValue() {
-	m.value = nil
-	m.addvalue = nil
-}
-
-// SetProcessed sets the "processed" field.
-func (m *DetectionJobInstanceMutation) SetProcessed(b bool) {
-	m.processed = &b
-}
-
-// Processed returns the value of the "processed" field in the mutation.
-func (m *DetectionJobInstanceMutation) Processed() (r bool, exists bool) {
-	v := m.processed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProcessed returns the old "processed" field's value of the DetectionJobInstance entity.
-// If the DetectionJobInstance object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DetectionJobInstanceMutation) OldProcessed(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldProcessed is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldProcessed requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProcessed: %w", err)
-	}
-	return oldValue.Processed, nil
-}
-
-// ResetProcessed resets all changes to the "processed" field.
-func (m *DetectionJobInstanceMutation) ResetProcessed() {
-	m.processed = nil
+// ResetFinishedAt resets all changes to the "finished_at" field.
+func (m *DetectionJobInstanceMutation) ResetFinishedAt() {
+	m.finished_at = nil
+	delete(m.clearedFields, detectionjobinstance.FieldFinishedAt)
 }
 
 // AddAnomalyIDs adds the "anomalies" edge to the Anomaly entity by ids.
@@ -1844,21 +1978,15 @@ func (m *DetectionJobInstanceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DetectionJobInstanceMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 3)
 	if m.create_time != nil {
 		fields = append(fields, detectionjobinstance.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, detectionjobinstance.FieldUpdateTime)
 	}
-	if m._type != nil {
-		fields = append(fields, detectionjobinstance.FieldType)
-	}
-	if m.value != nil {
-		fields = append(fields, detectionjobinstance.FieldValue)
-	}
-	if m.processed != nil {
-		fields = append(fields, detectionjobinstance.FieldProcessed)
+	if m.finished_at != nil {
+		fields = append(fields, detectionjobinstance.FieldFinishedAt)
 	}
 	return fields
 }
@@ -1872,12 +2000,8 @@ func (m *DetectionJobInstanceMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case detectionjobinstance.FieldUpdateTime:
 		return m.UpdateTime()
-	case detectionjobinstance.FieldType:
-		return m.GetType()
-	case detectionjobinstance.FieldValue:
-		return m.Value()
-	case detectionjobinstance.FieldProcessed:
-		return m.Processed()
+	case detectionjobinstance.FieldFinishedAt:
+		return m.FinishedAt()
 	}
 	return nil, false
 }
@@ -1891,12 +2015,8 @@ func (m *DetectionJobInstanceMutation) OldField(ctx context.Context, name string
 		return m.OldCreateTime(ctx)
 	case detectionjobinstance.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
-	case detectionjobinstance.FieldType:
-		return m.OldType(ctx)
-	case detectionjobinstance.FieldValue:
-		return m.OldValue(ctx)
-	case detectionjobinstance.FieldProcessed:
-		return m.OldProcessed(ctx)
+	case detectionjobinstance.FieldFinishedAt:
+		return m.OldFinishedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown DetectionJobInstance field %s", name)
 }
@@ -1920,26 +2040,12 @@ func (m *DetectionJobInstanceMutation) SetField(name string, value ent.Value) er
 		}
 		m.SetUpdateTime(v)
 		return nil
-	case detectionjobinstance.FieldType:
-		v, ok := value.(string)
+	case detectionjobinstance.FieldFinishedAt:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetType(v)
-		return nil
-	case detectionjobinstance.FieldValue:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetValue(v)
-		return nil
-	case detectionjobinstance.FieldProcessed:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProcessed(v)
+		m.SetFinishedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DetectionJobInstance field %s", name)
@@ -1948,21 +2054,13 @@ func (m *DetectionJobInstanceMutation) SetField(name string, value ent.Value) er
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *DetectionJobInstanceMutation) AddedFields() []string {
-	var fields []string
-	if m.addvalue != nil {
-		fields = append(fields, detectionjobinstance.FieldValue)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *DetectionJobInstanceMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case detectionjobinstance.FieldValue:
-		return m.AddedValue()
-	}
 	return nil, false
 }
 
@@ -1971,13 +2069,6 @@ func (m *DetectionJobInstanceMutation) AddedField(name string) (ent.Value, bool)
 // type.
 func (m *DetectionJobInstanceMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case detectionjobinstance.FieldValue:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddValue(v)
-		return nil
 	}
 	return fmt.Errorf("unknown DetectionJobInstance numeric field %s", name)
 }
@@ -1985,7 +2076,11 @@ func (m *DetectionJobInstanceMutation) AddField(name string, value ent.Value) er
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DetectionJobInstanceMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(detectionjobinstance.FieldFinishedAt) {
+		fields = append(fields, detectionjobinstance.FieldFinishedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1998,6 +2093,11 @@ func (m *DetectionJobInstanceMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DetectionJobInstanceMutation) ClearField(name string) error {
+	switch name {
+	case detectionjobinstance.FieldFinishedAt:
+		m.ClearFinishedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown DetectionJobInstance nullable field %s", name)
 }
 
@@ -2011,14 +2111,8 @@ func (m *DetectionJobInstanceMutation) ResetField(name string) error {
 	case detectionjobinstance.FieldUpdateTime:
 		m.ResetUpdateTime()
 		return nil
-	case detectionjobinstance.FieldType:
-		m.ResetType()
-		return nil
-	case detectionjobinstance.FieldValue:
-		m.ResetValue()
-		return nil
-	case detectionjobinstance.FieldProcessed:
-		m.ResetProcessed()
+	case detectionjobinstance.FieldFinishedAt:
+		m.ResetFinishedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown DetectionJobInstance field %s", name)

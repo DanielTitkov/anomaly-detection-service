@@ -25,6 +25,10 @@ const (
 	FieldMetric = "metric"
 	// FieldAttribute holds the string denoting the attribute field in the database.
 	FieldAttribute = "attribute"
+	// FieldTimeAgo holds the string denoting the time_ago field in the database.
+	FieldTimeAgo = "time_ago"
+	// FieldTimeStep holds the string denoting the time_step field in the database.
+	FieldTimeStep = "time_step"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 
@@ -52,6 +56,8 @@ var Columns = []string{
 	FieldSiteID,
 	FieldMetric,
 	FieldAttribute,
+	FieldTimeAgo,
+	FieldTimeStep,
 	FieldDescription,
 }
 
@@ -80,4 +86,8 @@ var (
 	MetricValidator func(string) error
 	// AttributeValidator is a validator for the "attribute" field. It is called by the builders before save.
 	AttributeValidator func(string) error
+	// TimeAgoValidator is a validator for the "time_ago" field. It is called by the builders before save.
+	TimeAgoValidator func(string) error
+	// TimeStepValidator is a validator for the "time_step" field. It is called by the builders before save.
+	TimeStepValidator func(string) error
 )

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -58,6 +59,18 @@ func (au *AnomalyUpdate) SetNillableProcessed(b *bool) *AnomalyUpdate {
 	if b != nil {
 		au.SetProcessed(*b)
 	}
+	return au
+}
+
+// SetPeriodStart sets the "period_start" field.
+func (au *AnomalyUpdate) SetPeriodStart(t time.Time) *AnomalyUpdate {
+	au.mutation.SetPeriodStart(t)
+	return au
+}
+
+// SetPeriodEnd sets the "period_end" field.
+func (au *AnomalyUpdate) SetPeriodEnd(t time.Time) *AnomalyUpdate {
+	au.mutation.SetPeriodEnd(t)
 	return au
 }
 
@@ -215,6 +228,20 @@ func (au *AnomalyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: anomaly.FieldProcessed,
 		})
 	}
+	if value, ok := au.mutation.PeriodStart(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodStart,
+		})
+	}
+	if value, ok := au.mutation.PeriodEnd(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodEnd,
+		})
+	}
 	if au.mutation.DetectionJobInstanceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -298,6 +325,18 @@ func (auo *AnomalyUpdateOne) SetNillableProcessed(b *bool) *AnomalyUpdateOne {
 	if b != nil {
 		auo.SetProcessed(*b)
 	}
+	return auo
+}
+
+// SetPeriodStart sets the "period_start" field.
+func (auo *AnomalyUpdateOne) SetPeriodStart(t time.Time) *AnomalyUpdateOne {
+	auo.mutation.SetPeriodStart(t)
+	return auo
+}
+
+// SetPeriodEnd sets the "period_end" field.
+func (auo *AnomalyUpdateOne) SetPeriodEnd(t time.Time) *AnomalyUpdateOne {
+	auo.mutation.SetPeriodEnd(t)
 	return auo
 }
 
@@ -458,6 +497,20 @@ func (auo *AnomalyUpdateOne) sqlSave(ctx context.Context) (_node *Anomaly, err e
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: anomaly.FieldProcessed,
+		})
+	}
+	if value, ok := auo.mutation.PeriodStart(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodStart,
+		})
+	}
+	if value, ok := auo.mutation.PeriodEnd(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodEnd,
 		})
 	}
 	if auo.mutation.DetectionJobInstanceCleared() {

@@ -16,6 +16,8 @@ var (
 		{Name: "type", Type: field.TypeString},
 		{Name: "value", Type: field.TypeFloat64},
 		{Name: "processed", Type: field.TypeBool},
+		{Name: "period_start", Type: field.TypeTime},
+		{Name: "period_end", Type: field.TypeTime},
 		{Name: "detection_job_instance_anomalies", Type: field.TypeInt, Nullable: true},
 	}
 	// AnomaliesTable holds the schema information for the "anomalies" table.
@@ -26,7 +28,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "anomalies_detection_job_instances_anomalies",
-				Columns: []*schema.Column{AnomaliesColumns[6]},
+				Columns: []*schema.Column{AnomaliesColumns[8]},
 
 				RefColumns: []*schema.Column{DetectionJobInstancesColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -43,6 +45,8 @@ var (
 		{Name: "site_id", Type: field.TypeString},
 		{Name: "metric", Type: field.TypeString},
 		{Name: "attribute", Type: field.TypeString},
+		{Name: "time_ago", Type: field.TypeString},
+		{Name: "time_step", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 	}
 	// DetectionJobsTable holds the schema information for the "detection_jobs" table.
@@ -57,9 +61,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeString},
-		{Name: "value", Type: field.TypeFloat64},
-		{Name: "processed", Type: field.TypeBool},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
 		{Name: "detection_job_instance", Type: field.TypeInt, Nullable: true},
 	}
 	// DetectionJobInstancesTable holds the schema information for the "detection_job_instances" table.
@@ -70,7 +72,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "detection_job_instances_detection_jobs_instance",
-				Columns: []*schema.Column{DetectionJobInstancesColumns[6]},
+				Columns: []*schema.Column{DetectionJobInstancesColumns[4]},
 
 				RefColumns: []*schema.Column{DetectionJobsColumns[0]},
 				OnDelete:   schema.SetNull,

@@ -27,6 +27,10 @@ type Anomaly struct {
 	Value float64 `json:"value,omitempty"`
 	// Processed holds the value of the "processed" field.
 	Processed bool `json:"processed,omitempty"`
+	// PeriodStart holds the value of the "period_start" field.
+	PeriodStart time.Time `json:"period_start,omitempty"`
+	// PeriodEnd holds the value of the "period_end" field.
+	PeriodEnd time.Time `json:"period_end,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AnomalyQuery when eager-loading is set.
 	Edges                            AnomalyEdges `json:"edges"`
@@ -69,7 +73,7 @@ func (*Anomaly) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case anomaly.FieldType:
 			values[i] = &sql.NullString{}
-		case anomaly.FieldCreateTime, anomaly.FieldUpdateTime:
+		case anomaly.FieldCreateTime, anomaly.FieldUpdateTime, anomaly.FieldPeriodStart, anomaly.FieldPeriodEnd:
 			values[i] = &sql.NullTime{}
 		case anomaly.ForeignKeys[0]: // detection_job_instance_anomalies
 			values[i] = &sql.NullInt64{}
@@ -124,6 +128,18 @@ func (a *Anomaly) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				a.Processed = value.Bool
 			}
+		case anomaly.FieldPeriodStart:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field period_start", values[i])
+			} else if value.Valid {
+				a.PeriodStart = value.Time
+			}
+		case anomaly.FieldPeriodEnd:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field period_end", values[i])
+			} else if value.Valid {
+				a.PeriodEnd = value.Time
+			}
 		case anomaly.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field detection_job_instance_anomalies", value)
@@ -174,6 +190,10 @@ func (a *Anomaly) String() string {
 	builder.WriteString(fmt.Sprintf("%v", a.Value))
 	builder.WriteString(", processed=")
 	builder.WriteString(fmt.Sprintf("%v", a.Processed))
+	builder.WriteString(", period_start=")
+	builder.WriteString(a.PeriodStart.Format(time.ANSIC))
+	builder.WriteString(", period_end=")
+	builder.WriteString(a.PeriodEnd.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

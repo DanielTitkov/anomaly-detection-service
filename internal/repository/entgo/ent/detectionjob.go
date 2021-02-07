@@ -30,6 +30,10 @@ type DetectionJob struct {
 	Metric string `json:"metric,omitempty"`
 	// Attribute holds the value of the "attribute" field.
 	Attribute string `json:"attribute,omitempty"`
+	// TimeAgo holds the value of the "time_ago" field.
+	TimeAgo string `json:"time_ago,omitempty"`
+	// TimeStep holds the value of the "time_step" field.
+	TimeStep string `json:"time_step,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -62,7 +66,7 @@ func (*DetectionJob) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case detectionjob.FieldID:
 			values[i] = &sql.NullInt64{}
-		case detectionjob.FieldSchedule, detectionjob.FieldMethod, detectionjob.FieldSiteID, detectionjob.FieldMetric, detectionjob.FieldAttribute, detectionjob.FieldDescription:
+		case detectionjob.FieldSchedule, detectionjob.FieldMethod, detectionjob.FieldSiteID, detectionjob.FieldMetric, detectionjob.FieldAttribute, detectionjob.FieldTimeAgo, detectionjob.FieldTimeStep, detectionjob.FieldDescription:
 			values[i] = &sql.NullString{}
 		case detectionjob.FieldCreateTime, detectionjob.FieldUpdateTime:
 			values[i] = &sql.NullTime{}
@@ -130,6 +134,18 @@ func (dj *DetectionJob) assignValues(columns []string, values []interface{}) err
 			} else if value.Valid {
 				dj.Attribute = value.String
 			}
+		case detectionjob.FieldTimeAgo:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field time_ago", values[i])
+			} else if value.Valid {
+				dj.TimeAgo = value.String
+			}
+		case detectionjob.FieldTimeStep:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field time_step", values[i])
+			} else if value.Valid {
+				dj.TimeStep = value.String
+			}
 		case detectionjob.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -185,6 +201,10 @@ func (dj *DetectionJob) String() string {
 	builder.WriteString(dj.Metric)
 	builder.WriteString(", attribute=")
 	builder.WriteString(dj.Attribute)
+	builder.WriteString(", time_ago=")
+	builder.WriteString(dj.TimeAgo)
+	builder.WriteString(", time_step=")
+	builder.WriteString(dj.TimeStep)
 	builder.WriteString(", description=")
 	builder.WriteString(dj.Description)
 	builder.WriteByte(')')

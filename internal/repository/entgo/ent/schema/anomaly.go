@@ -18,6 +18,8 @@ func (Anomaly) Fields() []ent.Field {
 		field.String("type").NotEmpty(),
 		field.Float("value"),
 		field.Bool("processed").Default(false),
+		field.Time("period_start"),
+		field.Time("period_end"),
 	}
 }
 

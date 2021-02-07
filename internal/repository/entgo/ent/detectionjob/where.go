@@ -142,6 +142,20 @@ func Attribute(v string) predicate.DetectionJob {
 	})
 }
 
+// TimeAgo applies equality check predicate on the "time_ago" field. It's identical to TimeAgoEQ.
+func TimeAgo(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeStep applies equality check predicate on the "time_step" field. It's identical to TimeStepEQ.
+func TimeStep(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimeStep), v))
+	})
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.DetectionJob {
 	return predicate.DetectionJob(func(s *sql.Selector) {
@@ -867,6 +881,228 @@ func AttributeEqualFold(v string) predicate.DetectionJob {
 func AttributeContainsFold(v string) predicate.DetectionJob {
 	return predicate.DetectionJob(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldAttribute), v))
+	})
+}
+
+// TimeAgoEQ applies the EQ predicate on the "time_ago" field.
+func TimeAgoEQ(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoNEQ applies the NEQ predicate on the "time_ago" field.
+func TimeAgoNEQ(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoIn applies the In predicate on the "time_ago" field.
+func TimeAgoIn(vs ...string) predicate.DetectionJob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTimeAgo), v...))
+	})
+}
+
+// TimeAgoNotIn applies the NotIn predicate on the "time_ago" field.
+func TimeAgoNotIn(vs ...string) predicate.DetectionJob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTimeAgo), v...))
+	})
+}
+
+// TimeAgoGT applies the GT predicate on the "time_ago" field.
+func TimeAgoGT(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoGTE applies the GTE predicate on the "time_ago" field.
+func TimeAgoGTE(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoLT applies the LT predicate on the "time_ago" field.
+func TimeAgoLT(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoLTE applies the LTE predicate on the "time_ago" field.
+func TimeAgoLTE(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoContains applies the Contains predicate on the "time_ago" field.
+func TimeAgoContains(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoHasPrefix applies the HasPrefix predicate on the "time_ago" field.
+func TimeAgoHasPrefix(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoHasSuffix applies the HasSuffix predicate on the "time_ago" field.
+func TimeAgoHasSuffix(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoEqualFold applies the EqualFold predicate on the "time_ago" field.
+func TimeAgoEqualFold(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeAgoContainsFold applies the ContainsFold predicate on the "time_ago" field.
+func TimeAgoContainsFold(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTimeAgo), v))
+	})
+}
+
+// TimeStepEQ applies the EQ predicate on the "time_step" field.
+func TimeStepEQ(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepNEQ applies the NEQ predicate on the "time_step" field.
+func TimeStepNEQ(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepIn applies the In predicate on the "time_step" field.
+func TimeStepIn(vs ...string) predicate.DetectionJob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTimeStep), v...))
+	})
+}
+
+// TimeStepNotIn applies the NotIn predicate on the "time_step" field.
+func TimeStepNotIn(vs ...string) predicate.DetectionJob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTimeStep), v...))
+	})
+}
+
+// TimeStepGT applies the GT predicate on the "time_step" field.
+func TimeStepGT(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepGTE applies the GTE predicate on the "time_step" field.
+func TimeStepGTE(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepLT applies the LT predicate on the "time_step" field.
+func TimeStepLT(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepLTE applies the LTE predicate on the "time_step" field.
+func TimeStepLTE(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepContains applies the Contains predicate on the "time_step" field.
+func TimeStepContains(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepHasPrefix applies the HasPrefix predicate on the "time_step" field.
+func TimeStepHasPrefix(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepHasSuffix applies the HasSuffix predicate on the "time_step" field.
+func TimeStepHasSuffix(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepEqualFold applies the EqualFold predicate on the "time_step" field.
+func TimeStepEqualFold(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTimeStep), v))
+	})
+}
+
+// TimeStepContainsFold applies the ContainsFold predicate on the "time_step" field.
+func TimeStepContainsFold(v string) predicate.DetectionJob {
+	return predicate.DetectionJob(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTimeStep), v))
 	})
 }
 

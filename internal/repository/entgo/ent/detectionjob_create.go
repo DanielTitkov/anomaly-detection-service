@@ -87,6 +87,18 @@ func (djc *DetectionJobCreate) SetAttribute(s string) *DetectionJobCreate {
 	return djc
 }
 
+// SetTimeAgo sets the "time_ago" field.
+func (djc *DetectionJobCreate) SetTimeAgo(s string) *DetectionJobCreate {
+	djc.mutation.SetTimeAgo(s)
+	return djc
+}
+
+// SetTimeStep sets the "time_step" field.
+func (djc *DetectionJobCreate) SetTimeStep(s string) *DetectionJobCreate {
+	djc.mutation.SetTimeStep(s)
+	return djc
+}
+
 // SetDescription sets the "description" field.
 func (djc *DetectionJobCreate) SetDescription(s string) *DetectionJobCreate {
 	djc.mutation.SetDescription(s)
@@ -218,6 +230,22 @@ func (djc *DetectionJobCreate) check() error {
 			return &ValidationError{Name: "attribute", err: fmt.Errorf("ent: validator failed for field \"attribute\": %w", err)}
 		}
 	}
+	if _, ok := djc.mutation.TimeAgo(); !ok {
+		return &ValidationError{Name: "time_ago", err: errors.New("ent: missing required field \"time_ago\"")}
+	}
+	if v, ok := djc.mutation.TimeAgo(); ok {
+		if err := detectionjob.TimeAgoValidator(v); err != nil {
+			return &ValidationError{Name: "time_ago", err: fmt.Errorf("ent: validator failed for field \"time_ago\": %w", err)}
+		}
+	}
+	if _, ok := djc.mutation.TimeStep(); !ok {
+		return &ValidationError{Name: "time_step", err: errors.New("ent: missing required field \"time_step\"")}
+	}
+	if v, ok := djc.mutation.TimeStep(); ok {
+		if err := detectionjob.TimeStepValidator(v); err != nil {
+			return &ValidationError{Name: "time_step", err: fmt.Errorf("ent: validator failed for field \"time_step\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -300,6 +328,22 @@ func (djc *DetectionJobCreate) createSpec() (*DetectionJob, *sqlgraph.CreateSpec
 			Column: detectionjob.FieldAttribute,
 		})
 		_node.Attribute = value
+	}
+	if value, ok := djc.mutation.TimeAgo(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeAgo,
+		})
+		_node.TimeAgo = value
+	}
+	if value, ok := djc.mutation.TimeStep(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeStep,
+		})
+		_node.TimeStep = value
 	}
 	if value, ok := djc.mutation.Description(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

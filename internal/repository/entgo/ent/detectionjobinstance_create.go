@@ -50,28 +50,16 @@ func (djic *DetectionJobInstanceCreate) SetNillableUpdateTime(t *time.Time) *Det
 	return djic
 }
 
-// SetType sets the "type" field.
-func (djic *DetectionJobInstanceCreate) SetType(s string) *DetectionJobInstanceCreate {
-	djic.mutation.SetType(s)
+// SetFinishedAt sets the "finished_at" field.
+func (djic *DetectionJobInstanceCreate) SetFinishedAt(t time.Time) *DetectionJobInstanceCreate {
+	djic.mutation.SetFinishedAt(t)
 	return djic
 }
 
-// SetValue sets the "value" field.
-func (djic *DetectionJobInstanceCreate) SetValue(f float64) *DetectionJobInstanceCreate {
-	djic.mutation.SetValue(f)
-	return djic
-}
-
-// SetProcessed sets the "processed" field.
-func (djic *DetectionJobInstanceCreate) SetProcessed(b bool) *DetectionJobInstanceCreate {
-	djic.mutation.SetProcessed(b)
-	return djic
-}
-
-// SetNillableProcessed sets the "processed" field if the given value is not nil.
-func (djic *DetectionJobInstanceCreate) SetNillableProcessed(b *bool) *DetectionJobInstanceCreate {
-	if b != nil {
-		djic.SetProcessed(*b)
+// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
+func (djic *DetectionJobInstanceCreate) SetNillableFinishedAt(t *time.Time) *DetectionJobInstanceCreate {
+	if t != nil {
+		djic.SetFinishedAt(*t)
 	}
 	return djic
 }
@@ -162,10 +150,6 @@ func (djic *DetectionJobInstanceCreate) defaults() {
 		v := detectionjobinstance.DefaultUpdateTime()
 		djic.mutation.SetUpdateTime(v)
 	}
-	if _, ok := djic.mutation.Processed(); !ok {
-		v := detectionjobinstance.DefaultProcessed
-		djic.mutation.SetProcessed(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -175,20 +159,6 @@ func (djic *DetectionJobInstanceCreate) check() error {
 	}
 	if _, ok := djic.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New("ent: missing required field \"update_time\"")}
-	}
-	if _, ok := djic.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New("ent: missing required field \"type\"")}
-	}
-	if v, ok := djic.mutation.GetType(); ok {
-		if err := detectionjobinstance.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-	if _, ok := djic.mutation.Value(); !ok {
-		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
-	}
-	if _, ok := djic.mutation.Processed(); !ok {
-		return &ValidationError{Name: "processed", err: errors.New("ent: missing required field \"processed\"")}
 	}
 	if _, ok := djic.mutation.DetectionJobID(); !ok {
 		return &ValidationError{Name: "detection_job", err: errors.New("ent: missing required edge \"detection_job\"")}
@@ -236,29 +206,13 @@ func (djic *DetectionJobInstanceCreate) createSpec() (*DetectionJobInstance, *sq
 		})
 		_node.UpdateTime = value
 	}
-	if value, ok := djic.mutation.GetType(); ok {
+	if value, ok := djic.mutation.FinishedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: detectionjobinstance.FieldType,
+			Column: detectionjobinstance.FieldFinishedAt,
 		})
-		_node.Type = value
-	}
-	if value, ok := djic.mutation.Value(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: detectionjobinstance.FieldValue,
-		})
-		_node.Value = value
-	}
-	if value, ok := djic.mutation.Processed(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: detectionjobinstance.FieldProcessed,
-		})
-		_node.Processed = value
+		_node.FinishedAt = &value
 	}
 	if nodes := djic.mutation.AnomaliesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

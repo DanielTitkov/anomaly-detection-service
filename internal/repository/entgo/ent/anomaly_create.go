@@ -75,6 +75,18 @@ func (ac *AnomalyCreate) SetNillableProcessed(b *bool) *AnomalyCreate {
 	return ac
 }
 
+// SetPeriodStart sets the "period_start" field.
+func (ac *AnomalyCreate) SetPeriodStart(t time.Time) *AnomalyCreate {
+	ac.mutation.SetPeriodStart(t)
+	return ac
+}
+
+// SetPeriodEnd sets the "period_end" field.
+func (ac *AnomalyCreate) SetPeriodEnd(t time.Time) *AnomalyCreate {
+	ac.mutation.SetPeriodEnd(t)
+	return ac
+}
+
 // SetDetectionJobInstanceID sets the "detection_job_instance" edge to the DetectionJobInstance entity by ID.
 func (ac *AnomalyCreate) SetDetectionJobInstanceID(id int) *AnomalyCreate {
 	ac.mutation.SetDetectionJobInstanceID(id)
@@ -174,6 +186,12 @@ func (ac *AnomalyCreate) check() error {
 	if _, ok := ac.mutation.Processed(); !ok {
 		return &ValidationError{Name: "processed", err: errors.New("ent: missing required field \"processed\"")}
 	}
+	if _, ok := ac.mutation.PeriodStart(); !ok {
+		return &ValidationError{Name: "period_start", err: errors.New("ent: missing required field \"period_start\"")}
+	}
+	if _, ok := ac.mutation.PeriodEnd(); !ok {
+		return &ValidationError{Name: "period_end", err: errors.New("ent: missing required field \"period_end\"")}
+	}
 	if _, ok := ac.mutation.DetectionJobInstanceID(); !ok {
 		return &ValidationError{Name: "detection_job_instance", err: errors.New("ent: missing required edge \"detection_job_instance\"")}
 	}
@@ -243,6 +261,22 @@ func (ac *AnomalyCreate) createSpec() (*Anomaly, *sqlgraph.CreateSpec) {
 			Column: anomaly.FieldProcessed,
 		})
 		_node.Processed = value
+	}
+	if value, ok := ac.mutation.PeriodStart(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodStart,
+		})
+		_node.PeriodStart = value
+	}
+	if value, ok := ac.mutation.PeriodEnd(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: anomaly.FieldPeriodEnd,
+		})
+		_node.PeriodEnd = value
 	}
 	if nodes := ac.mutation.DetectionJobInstanceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

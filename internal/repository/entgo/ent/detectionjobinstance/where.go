@@ -107,24 +107,10 @@ func UpdateTime(v time.Time) predicate.DetectionJobInstance {
 	})
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v string) predicate.DetectionJobInstance {
+// FinishedAt applies equality check predicate on the "finished_at" field. It's identical to FinishedAtEQ.
+func FinishedAt(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
-	})
-}
-
-// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
-func Value(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
-}
-
-// Processed applies equality check predicate on the "processed" field. It's identical to ProcessedEQ.
-func Processed(v bool) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProcessed), v))
+		s.Where(sql.EQ(s.C(FieldFinishedAt), v))
 	})
 }
 
@@ -280,22 +266,22 @@ func UpdateTimeLTE(v time.Time) predicate.DetectionJobInstance {
 	})
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v string) predicate.DetectionJobInstance {
+// FinishedAtEQ applies the EQ predicate on the "finished_at" field.
+func FinishedAtEQ(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
+		s.Where(sql.EQ(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v string) predicate.DetectionJobInstance {
+// FinishedAtNEQ applies the NEQ predicate on the "finished_at" field.
+func FinishedAtNEQ(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldType), v))
+		s.Where(sql.NEQ(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...string) predicate.DetectionJobInstance {
+// FinishedAtIn applies the In predicate on the "finished_at" field.
+func FinishedAtIn(vs ...time.Time) predicate.DetectionJobInstance {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -307,12 +293,12 @@ func TypeIn(vs ...string) predicate.DetectionJobInstance {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldType), v...))
+		s.Where(sql.In(s.C(FieldFinishedAt), v...))
 	})
 }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...string) predicate.DetectionJobInstance {
+// FinishedAtNotIn applies the NotIn predicate on the "finished_at" field.
+func FinishedAtNotIn(vs ...time.Time) predicate.DetectionJobInstance {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -324,160 +310,49 @@ func TypeNotIn(vs ...string) predicate.DetectionJobInstance {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldType), v...))
+		s.Where(sql.NotIn(s.C(FieldFinishedAt), v...))
 	})
 }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v string) predicate.DetectionJobInstance {
+// FinishedAtGT applies the GT predicate on the "finished_at" field.
+func FinishedAtGT(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldType), v))
+		s.Where(sql.GT(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v string) predicate.DetectionJobInstance {
+// FinishedAtGTE applies the GTE predicate on the "finished_at" field.
+func FinishedAtGTE(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldType), v))
+		s.Where(sql.GTE(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v string) predicate.DetectionJobInstance {
+// FinishedAtLT applies the LT predicate on the "finished_at" field.
+func FinishedAtLT(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldType), v))
+		s.Where(sql.LT(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v string) predicate.DetectionJobInstance {
+// FinishedAtLTE applies the LTE predicate on the "finished_at" field.
+func FinishedAtLTE(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldType), v))
+		s.Where(sql.LTE(s.C(FieldFinishedAt), v))
 	})
 }
 
-// TypeContains applies the Contains predicate on the "type" field.
-func TypeContains(v string) predicate.DetectionJobInstance {
+// FinishedAtIsNil applies the IsNil predicate on the "finished_at" field.
+func FinishedAtIsNil() predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldType), v))
+		s.Where(sql.IsNull(s.C(FieldFinishedAt)))
 	})
 }
 
-// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
-func TypeHasPrefix(v string) predicate.DetectionJobInstance {
+// FinishedAtNotNil applies the NotNil predicate on the "finished_at" field.
+func FinishedAtNotNil() predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldType), v))
-	})
-}
-
-// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
-func TypeHasSuffix(v string) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldType), v))
-	})
-}
-
-// TypeEqualFold applies the EqualFold predicate on the "type" field.
-func TypeEqualFold(v string) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldType), v))
-	})
-}
-
-// TypeContainsFold applies the ContainsFold predicate on the "type" field.
-func TypeContainsFold(v string) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldType), v))
-	})
-}
-
-// ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
-	})
-}
-
-// ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValue), v))
-	})
-}
-
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...float64) predicate.DetectionJobInstance {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldValue), v...))
-	})
-}
-
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...float64) predicate.DetectionJobInstance {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldValue), v...))
-	})
-}
-
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValue), v))
-	})
-}
-
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValue), v))
-	})
-}
-
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValue), v))
-	})
-}
-
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v float64) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValue), v))
-	})
-}
-
-// ProcessedEQ applies the EQ predicate on the "processed" field.
-func ProcessedEQ(v bool) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProcessed), v))
-	})
-}
-
-// ProcessedNEQ applies the NEQ predicate on the "processed" field.
-func ProcessedNEQ(v bool) predicate.DetectionJobInstance {
-	return predicate.DetectionJobInstance(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldProcessed), v))
+		s.Where(sql.NotNull(s.C(FieldFinishedAt)))
 	})
 }
 

@@ -1,4 +1,4 @@
-package fake
+package mock
 
 import (
 	"fmt"
@@ -6,10 +6,10 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
 )
 
-// Service provides fake notification processing
+// Service provides mock notification processing
 type Service struct{}
 
-// NewService returns fake notification service
+// NewService returns mock notification service
 func NewService() *Service {
 	return &Service{}
 }

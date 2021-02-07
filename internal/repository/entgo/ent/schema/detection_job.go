@@ -20,6 +20,8 @@ func (DetectionJob) Fields() []ent.Field {
 		field.String("site_id").NotEmpty(),
 		field.String("metric").NotEmpty(),
 		field.String("attribute").NotEmpty(),
+		field.String("time_ago").NotEmpty(),
+		field.String("time_step").NotEmpty(),
 		field.String("description").Optional(),
 	}
 }
@@ -33,13 +35,11 @@ func (DetectionJob) Edges() []ent.Edge {
 }
 
 // Indexes of the DetectionJob.
-// func (DetectionJob) Indexes() []ent.Index {
-// 	return []ent.Index{
-// 		index.Fields("slug").Edges("user").Unique(),
-// 		index.Fields("title").Edges("user").Unique(),
-// 	}
-// }
+func (DetectionJob) Indexes() []ent.Index {
+	return []ent.Index{}
+}
 
+// Mixin of the DetectionJob.
 func (DetectionJob) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},

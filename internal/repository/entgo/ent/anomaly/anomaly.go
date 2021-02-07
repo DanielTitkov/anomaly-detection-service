@@ -21,6 +21,10 @@ const (
 	FieldValue = "value"
 	// FieldProcessed holds the string denoting the processed field in the database.
 	FieldProcessed = "processed"
+	// FieldPeriodStart holds the string denoting the period_start field in the database.
+	FieldPeriodStart = "period_start"
+	// FieldPeriodEnd holds the string denoting the period_end field in the database.
+	FieldPeriodEnd = "period_end"
 
 	// EdgeDetectionJobInstance holds the string denoting the detection_job_instance edge name in mutations.
 	EdgeDetectionJobInstance = "detection_job_instance"
@@ -44,6 +48,8 @@ var Columns = []string{
 	FieldType,
 	FieldValue,
 	FieldProcessed,
+	FieldPeriodStart,
+	FieldPeriodEnd,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Anomaly type.

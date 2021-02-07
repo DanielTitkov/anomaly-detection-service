@@ -10,14 +10,19 @@ type (
 		Type                   string  // warning or alarm
 		Value                  float64 // outlier item value
 		Processed              bool    // if anomaly is accepted/approved
+		PeriodStart            time.Time
+		PeriodEnd              time.Time
 	}
 	DetectionJob struct {
-		ID        int
-		Schedule  string // cron string
-		Method    string // e.g, 3-sigmas
-		SiteID    string
-		Metric    string
-		Attribute string
+		ID          int
+		Schedule    string // cron string
+		Method      string // e.g, 3-sigmas
+		SiteID      string
+		Metric      string
+		Attribute   string
+		TimeAgo     string // e.g. 30d
+		TimeStep    string // e.g. 1d
+		Description string
 	}
 	DetectionJobInstance struct {
 		ID             int

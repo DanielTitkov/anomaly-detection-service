@@ -128,6 +128,20 @@ func Processed(v bool) predicate.Anomaly {
 	})
 }
 
+// PeriodStart applies equality check predicate on the "period_start" field. It's identical to PeriodStartEQ.
+func PeriodStart(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodEnd applies equality check predicate on the "period_end" field. It's identical to PeriodEndEQ.
+func PeriodEnd(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPeriodEnd), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Anomaly {
 	return predicate.Anomaly(func(s *sql.Selector) {
@@ -478,6 +492,158 @@ func ProcessedEQ(v bool) predicate.Anomaly {
 func ProcessedNEQ(v bool) predicate.Anomaly {
 	return predicate.Anomaly(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldProcessed), v))
+	})
+}
+
+// PeriodStartEQ applies the EQ predicate on the "period_start" field.
+func PeriodStartEQ(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodStartNEQ applies the NEQ predicate on the "period_start" field.
+func PeriodStartNEQ(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodStartIn applies the In predicate on the "period_start" field.
+func PeriodStartIn(vs ...time.Time) predicate.Anomaly {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Anomaly(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPeriodStart), v...))
+	})
+}
+
+// PeriodStartNotIn applies the NotIn predicate on the "period_start" field.
+func PeriodStartNotIn(vs ...time.Time) predicate.Anomaly {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Anomaly(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPeriodStart), v...))
+	})
+}
+
+// PeriodStartGT applies the GT predicate on the "period_start" field.
+func PeriodStartGT(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodStartGTE applies the GTE predicate on the "period_start" field.
+func PeriodStartGTE(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodStartLT applies the LT predicate on the "period_start" field.
+func PeriodStartLT(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodStartLTE applies the LTE predicate on the "period_start" field.
+func PeriodStartLTE(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPeriodStart), v))
+	})
+}
+
+// PeriodEndEQ applies the EQ predicate on the "period_end" field.
+func PeriodEndEQ(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPeriodEnd), v))
+	})
+}
+
+// PeriodEndNEQ applies the NEQ predicate on the "period_end" field.
+func PeriodEndNEQ(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPeriodEnd), v))
+	})
+}
+
+// PeriodEndIn applies the In predicate on the "period_end" field.
+func PeriodEndIn(vs ...time.Time) predicate.Anomaly {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Anomaly(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPeriodEnd), v...))
+	})
+}
+
+// PeriodEndNotIn applies the NotIn predicate on the "period_end" field.
+func PeriodEndNotIn(vs ...time.Time) predicate.Anomaly {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Anomaly(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPeriodEnd), v...))
+	})
+}
+
+// PeriodEndGT applies the GT predicate on the "period_end" field.
+func PeriodEndGT(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPeriodEnd), v))
+	})
+}
+
+// PeriodEndGTE applies the GTE predicate on the "period_end" field.
+func PeriodEndGTE(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPeriodEnd), v))
+	})
+}
+
+// PeriodEndLT applies the LT predicate on the "period_end" field.
+func PeriodEndLT(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPeriodEnd), v))
+	})
+}
+
+// PeriodEndLTE applies the LTE predicate on the "period_end" field.
+func PeriodEndLTE(v time.Time) predicate.Anomaly {
+	return predicate.Anomaly(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPeriodEnd), v))
 	})
 }
 

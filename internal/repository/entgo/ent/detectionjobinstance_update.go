@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,36 +30,23 @@ func (djiu *DetectionJobInstanceUpdate) Where(ps ...predicate.DetectionJobInstan
 	return djiu
 }
 
-// SetType sets the "type" field.
-func (djiu *DetectionJobInstanceUpdate) SetType(s string) *DetectionJobInstanceUpdate {
-	djiu.mutation.SetType(s)
+// SetFinishedAt sets the "finished_at" field.
+func (djiu *DetectionJobInstanceUpdate) SetFinishedAt(t time.Time) *DetectionJobInstanceUpdate {
+	djiu.mutation.SetFinishedAt(t)
 	return djiu
 }
 
-// SetValue sets the "value" field.
-func (djiu *DetectionJobInstanceUpdate) SetValue(f float64) *DetectionJobInstanceUpdate {
-	djiu.mutation.ResetValue()
-	djiu.mutation.SetValue(f)
-	return djiu
-}
-
-// AddValue adds f to the "value" field.
-func (djiu *DetectionJobInstanceUpdate) AddValue(f float64) *DetectionJobInstanceUpdate {
-	djiu.mutation.AddValue(f)
-	return djiu
-}
-
-// SetProcessed sets the "processed" field.
-func (djiu *DetectionJobInstanceUpdate) SetProcessed(b bool) *DetectionJobInstanceUpdate {
-	djiu.mutation.SetProcessed(b)
-	return djiu
-}
-
-// SetNillableProcessed sets the "processed" field if the given value is not nil.
-func (djiu *DetectionJobInstanceUpdate) SetNillableProcessed(b *bool) *DetectionJobInstanceUpdate {
-	if b != nil {
-		djiu.SetProcessed(*b)
+// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
+func (djiu *DetectionJobInstanceUpdate) SetNillableFinishedAt(t *time.Time) *DetectionJobInstanceUpdate {
+	if t != nil {
+		djiu.SetFinishedAt(*t)
 	}
+	return djiu
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (djiu *DetectionJobInstanceUpdate) ClearFinishedAt() *DetectionJobInstanceUpdate {
+	djiu.mutation.ClearFinishedAt()
 	return djiu
 }
 
@@ -188,11 +176,6 @@ func (djiu *DetectionJobInstanceUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (djiu *DetectionJobInstanceUpdate) check() error {
-	if v, ok := djiu.mutation.GetType(); ok {
-		if err := detectionjobinstance.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
 	if _, ok := djiu.mutation.DetectionJobID(); djiu.mutation.DetectionJobCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"detection_job\"")
 	}
@@ -224,32 +207,17 @@ func (djiu *DetectionJobInstanceUpdate) sqlSave(ctx context.Context) (n int, err
 			Column: detectionjobinstance.FieldUpdateTime,
 		})
 	}
-	if value, ok := djiu.mutation.GetType(); ok {
+	if value, ok := djiu.mutation.FinishedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: detectionjobinstance.FieldType,
+			Column: detectionjobinstance.FieldFinishedAt,
 		})
 	}
-	if value, ok := djiu.mutation.Value(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: detectionjobinstance.FieldValue,
-		})
-	}
-	if value, ok := djiu.mutation.AddedValue(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: detectionjobinstance.FieldValue,
-		})
-	}
-	if value, ok := djiu.mutation.Processed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: detectionjobinstance.FieldProcessed,
+	if djiu.mutation.FinishedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: detectionjobinstance.FieldFinishedAt,
 		})
 	}
 	if djiu.mutation.AnomaliesCleared() {
@@ -359,36 +327,23 @@ type DetectionJobInstanceUpdateOne struct {
 	mutation *DetectionJobInstanceMutation
 }
 
-// SetType sets the "type" field.
-func (djiuo *DetectionJobInstanceUpdateOne) SetType(s string) *DetectionJobInstanceUpdateOne {
-	djiuo.mutation.SetType(s)
+// SetFinishedAt sets the "finished_at" field.
+func (djiuo *DetectionJobInstanceUpdateOne) SetFinishedAt(t time.Time) *DetectionJobInstanceUpdateOne {
+	djiuo.mutation.SetFinishedAt(t)
 	return djiuo
 }
 
-// SetValue sets the "value" field.
-func (djiuo *DetectionJobInstanceUpdateOne) SetValue(f float64) *DetectionJobInstanceUpdateOne {
-	djiuo.mutation.ResetValue()
-	djiuo.mutation.SetValue(f)
-	return djiuo
-}
-
-// AddValue adds f to the "value" field.
-func (djiuo *DetectionJobInstanceUpdateOne) AddValue(f float64) *DetectionJobInstanceUpdateOne {
-	djiuo.mutation.AddValue(f)
-	return djiuo
-}
-
-// SetProcessed sets the "processed" field.
-func (djiuo *DetectionJobInstanceUpdateOne) SetProcessed(b bool) *DetectionJobInstanceUpdateOne {
-	djiuo.mutation.SetProcessed(b)
-	return djiuo
-}
-
-// SetNillableProcessed sets the "processed" field if the given value is not nil.
-func (djiuo *DetectionJobInstanceUpdateOne) SetNillableProcessed(b *bool) *DetectionJobInstanceUpdateOne {
-	if b != nil {
-		djiuo.SetProcessed(*b)
+// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
+func (djiuo *DetectionJobInstanceUpdateOne) SetNillableFinishedAt(t *time.Time) *DetectionJobInstanceUpdateOne {
+	if t != nil {
+		djiuo.SetFinishedAt(*t)
 	}
+	return djiuo
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (djiuo *DetectionJobInstanceUpdateOne) ClearFinishedAt() *DetectionJobInstanceUpdateOne {
+	djiuo.mutation.ClearFinishedAt()
 	return djiuo
 }
 
@@ -518,11 +473,6 @@ func (djiuo *DetectionJobInstanceUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (djiuo *DetectionJobInstanceUpdateOne) check() error {
-	if v, ok := djiuo.mutation.GetType(); ok {
-		if err := detectionjobinstance.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
 	if _, ok := djiuo.mutation.DetectionJobID(); djiuo.mutation.DetectionJobCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"detection_job\"")
 	}
@@ -559,32 +509,17 @@ func (djiuo *DetectionJobInstanceUpdateOne) sqlSave(ctx context.Context) (_node 
 			Column: detectionjobinstance.FieldUpdateTime,
 		})
 	}
-	if value, ok := djiuo.mutation.GetType(); ok {
+	if value, ok := djiuo.mutation.FinishedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: detectionjobinstance.FieldType,
+			Column: detectionjobinstance.FieldFinishedAt,
 		})
 	}
-	if value, ok := djiuo.mutation.Value(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: detectionjobinstance.FieldValue,
-		})
-	}
-	if value, ok := djiuo.mutation.AddedValue(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: detectionjobinstance.FieldValue,
-		})
-	}
-	if value, ok := djiuo.mutation.Processed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: detectionjobinstance.FieldProcessed,
+	if djiuo.mutation.FinishedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: detectionjobinstance.FieldFinishedAt,
 		})
 	}
 	if djiuo.mutation.AnomaliesCleared() {

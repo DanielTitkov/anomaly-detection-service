@@ -71,6 +71,18 @@ func (dju *DetectionJobUpdate) SetAttribute(s string) *DetectionJobUpdate {
 	return dju
 }
 
+// SetTimeAgo sets the "time_ago" field.
+func (dju *DetectionJobUpdate) SetTimeAgo(s string) *DetectionJobUpdate {
+	dju.mutation.SetTimeAgo(s)
+	return dju
+}
+
+// SetTimeStep sets the "time_step" field.
+func (dju *DetectionJobUpdate) SetTimeStep(s string) *DetectionJobUpdate {
+	dju.mutation.SetTimeStep(s)
+	return dju
+}
+
 // SetDescription sets the "description" field.
 func (dju *DetectionJobUpdate) SetDescription(s string) *DetectionJobUpdate {
 	dju.mutation.SetDescription(s)
@@ -220,6 +232,16 @@ func (dju *DetectionJobUpdate) check() error {
 			return &ValidationError{Name: "attribute", err: fmt.Errorf("ent: validator failed for field \"attribute\": %w", err)}
 		}
 	}
+	if v, ok := dju.mutation.TimeAgo(); ok {
+		if err := detectionjob.TimeAgoValidator(v); err != nil {
+			return &ValidationError{Name: "time_ago", err: fmt.Errorf("ent: validator failed for field \"time_ago\": %w", err)}
+		}
+	}
+	if v, ok := dju.mutation.TimeStep(); ok {
+		if err := detectionjob.TimeStepValidator(v); err != nil {
+			return &ValidationError{Name: "time_step", err: fmt.Errorf("ent: validator failed for field \"time_step\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -287,6 +309,20 @@ func (dju *DetectionJobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: detectionjob.FieldAttribute,
+		})
+	}
+	if value, ok := dju.mutation.TimeAgo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeAgo,
+		})
+	}
+	if value, ok := dju.mutation.TimeStep(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeStep,
 		})
 	}
 	if value, ok := dju.mutation.Description(); ok {
@@ -415,6 +451,18 @@ func (djuo *DetectionJobUpdateOne) SetMetric(s string) *DetectionJobUpdateOne {
 // SetAttribute sets the "attribute" field.
 func (djuo *DetectionJobUpdateOne) SetAttribute(s string) *DetectionJobUpdateOne {
 	djuo.mutation.SetAttribute(s)
+	return djuo
+}
+
+// SetTimeAgo sets the "time_ago" field.
+func (djuo *DetectionJobUpdateOne) SetTimeAgo(s string) *DetectionJobUpdateOne {
+	djuo.mutation.SetTimeAgo(s)
+	return djuo
+}
+
+// SetTimeStep sets the "time_step" field.
+func (djuo *DetectionJobUpdateOne) SetTimeStep(s string) *DetectionJobUpdateOne {
+	djuo.mutation.SetTimeStep(s)
 	return djuo
 }
 
@@ -567,6 +615,16 @@ func (djuo *DetectionJobUpdateOne) check() error {
 			return &ValidationError{Name: "attribute", err: fmt.Errorf("ent: validator failed for field \"attribute\": %w", err)}
 		}
 	}
+	if v, ok := djuo.mutation.TimeAgo(); ok {
+		if err := detectionjob.TimeAgoValidator(v); err != nil {
+			return &ValidationError{Name: "time_ago", err: fmt.Errorf("ent: validator failed for field \"time_ago\": %w", err)}
+		}
+	}
+	if v, ok := djuo.mutation.TimeStep(); ok {
+		if err := detectionjob.TimeStepValidator(v); err != nil {
+			return &ValidationError{Name: "time_step", err: fmt.Errorf("ent: validator failed for field \"time_step\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -639,6 +697,20 @@ func (djuo *DetectionJobUpdateOne) sqlSave(ctx context.Context) (_node *Detectio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: detectionjob.FieldAttribute,
+		})
+	}
+	if value, ok := djuo.mutation.TimeAgo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeAgo,
+		})
+	}
+	if value, ok := djuo.mutation.TimeStep(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: detectionjob.FieldTimeStep,
 		})
 	}
 	if value, ok := djuo.mutation.Description(); ok {

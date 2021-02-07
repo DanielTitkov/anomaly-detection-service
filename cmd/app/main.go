@@ -12,7 +12,7 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/logger"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent"
-	fakeNotification "github.com/DanielTitkov/anomaly-detection-service/internal/service/notification/fake"
+	mockNotification "github.com/DanielTitkov/anomaly-detection-service/internal/service/notification/mock"
 
 	_ "github.com/lib/pq"
 )
@@ -49,7 +49,7 @@ func main() {
 	logger.Info("migrations done", "")
 
 	repo := entgo.NewEntgoRepository(db, logger)
-	notification := fakeNotification.NewService()
+	notification := mockNotification.NewService()
 
 	app := app.NewApp(cfg, logger, repo, notification)
 

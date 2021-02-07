@@ -15,12 +15,8 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// FieldValue holds the string denoting the value field in the database.
-	FieldValue = "value"
-	// FieldProcessed holds the string denoting the processed field in the database.
-	FieldProcessed = "processed"
+	// FieldFinishedAt holds the string denoting the finished_at field in the database.
+	FieldFinishedAt = "finished_at"
 
 	// EdgeAnomalies holds the string denoting the anomalies edge name in mutations.
 	EdgeAnomalies = "anomalies"
@@ -50,9 +46,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
-	FieldType,
-	FieldValue,
-	FieldProcessed,
+	FieldFinishedAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the DetectionJobInstance type.
@@ -82,8 +76,4 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
-	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	TypeValidator func(string) error
-	// DefaultProcessed holds the default value on creation for the "processed" field.
-	DefaultProcessed bool
 )

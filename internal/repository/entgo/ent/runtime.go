@@ -69,6 +69,14 @@ func init() {
 	detectionjobDescAttribute := detectionjobFields[4].Descriptor()
 	// detectionjob.AttributeValidator is a validator for the "attribute" field. It is called by the builders before save.
 	detectionjob.AttributeValidator = detectionjobDescAttribute.Validators[0].(func(string) error)
+	// detectionjobDescTimeAgo is the schema descriptor for time_ago field.
+	detectionjobDescTimeAgo := detectionjobFields[5].Descriptor()
+	// detectionjob.TimeAgoValidator is a validator for the "time_ago" field. It is called by the builders before save.
+	detectionjob.TimeAgoValidator = detectionjobDescTimeAgo.Validators[0].(func(string) error)
+	// detectionjobDescTimeStep is the schema descriptor for time_step field.
+	detectionjobDescTimeStep := detectionjobFields[6].Descriptor()
+	// detectionjob.TimeStepValidator is a validator for the "time_step" field. It is called by the builders before save.
+	detectionjob.TimeStepValidator = detectionjobDescTimeStep.Validators[0].(func(string) error)
 	detectionjobinstanceMixin := schema.DetectionJobInstance{}.Mixin()
 	detectionjobinstanceMixinFields0 := detectionjobinstanceMixin[0].Fields()
 	_ = detectionjobinstanceMixinFields0
@@ -84,12 +92,4 @@ func init() {
 	detectionjobinstance.DefaultUpdateTime = detectionjobinstanceDescUpdateTime.Default.(func() time.Time)
 	// detectionjobinstance.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	detectionjobinstance.UpdateDefaultUpdateTime = detectionjobinstanceDescUpdateTime.UpdateDefault.(func() time.Time)
-	// detectionjobinstanceDescType is the schema descriptor for type field.
-	detectionjobinstanceDescType := detectionjobinstanceFields[0].Descriptor()
-	// detectionjobinstance.TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	detectionjobinstance.TypeValidator = detectionjobinstanceDescType.Validators[0].(func(string) error)
-	// detectionjobinstanceDescProcessed is the schema descriptor for processed field.
-	detectionjobinstanceDescProcessed := detectionjobinstanceFields[2].Descriptor()
-	// detectionjobinstance.DefaultProcessed holds the default value on creation for the processed field.
-	detectionjobinstance.DefaultProcessed = detectionjobinstanceDescProcessed.Default.(bool)
 }

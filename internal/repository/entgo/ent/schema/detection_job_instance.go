@@ -15,9 +15,7 @@ type DetectionJobInstance struct {
 // Fields of the DetectionJobInstance.
 func (DetectionJobInstance) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("type").NotEmpty(),
-		field.Float("value"),
-		field.Bool("processed").Default(false),
+		field.Time("finished_at").Nillable().Optional(),
 	}
 }
 
