@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"os"
 
 	"github.com/DanielTitkov/anomaly-detection-service/cmd/app/prepare"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/app"
@@ -19,7 +21,14 @@ func main() {
 	defer logger.Sync()
 	logger.Info("starting service", "")
 
-	cfg, err := configs.ReadConfigs("./configs/dev.yml")
+	args := os.Args[1:]
+	if len(args) < 1 {
+		logger.Fatal("failed to load config", errors.New("config path is not provided"))
+	}
+	configPath := args[0]
+	logger.Info("loading config from "+configPath, "")
+
+	cfg, err := configs.ReadConfigs(configPath)
 	if err != nil {
 		logger.Fatal("failed to load config", err)
 	}

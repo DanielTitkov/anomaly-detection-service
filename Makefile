@@ -1,8 +1,9 @@
 APP := app
+DEV_CONFIG_PATH := ./configs/dev.yml
 
 .PHONY: dev
 dev: entgen
-	go run cmd/$(APP)/main.go
+	go run cmd/$(APP)/main.go ${DEV_CONFIG_PATH}
 
 .PHONY: db
 db:
