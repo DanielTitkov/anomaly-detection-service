@@ -1660,6 +1660,7 @@ type DetectionJobInstanceMutation struct {
 	id                   *int
 	create_time          *time.Time
 	update_time          *time.Time
+	started_at           *time.Time
 	finished_at          *time.Time
 	clearedFields        map[string]struct{}
 	anomalies            map[int]struct{}
@@ -1823,6 +1824,55 @@ func (m *DetectionJobInstanceMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
 
+// SetStartedAt sets the "started_at" field.
+func (m *DetectionJobInstanceMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *DetectionJobInstanceMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the DetectionJobInstance entity.
+// If the DetectionJobInstance object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DetectionJobInstanceMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (m *DetectionJobInstanceMutation) ClearStartedAt() {
+	m.started_at = nil
+	m.clearedFields[detectionjobinstance.FieldStartedAt] = struct{}{}
+}
+
+// StartedAtCleared returns if the "started_at" field was cleared in this mutation.
+func (m *DetectionJobInstanceMutation) StartedAtCleared() bool {
+	_, ok := m.clearedFields[detectionjobinstance.FieldStartedAt]
+	return ok
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *DetectionJobInstanceMutation) ResetStartedAt() {
+	m.started_at = nil
+	delete(m.clearedFields, detectionjobinstance.FieldStartedAt)
+}
+
 // SetFinishedAt sets the "finished_at" field.
 func (m *DetectionJobInstanceMutation) SetFinishedAt(t time.Time) {
 	m.finished_at = &t
@@ -1978,12 +2028,15 @@ func (m *DetectionJobInstanceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DetectionJobInstanceMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.create_time != nil {
 		fields = append(fields, detectionjobinstance.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, detectionjobinstance.FieldUpdateTime)
+	}
+	if m.started_at != nil {
+		fields = append(fields, detectionjobinstance.FieldStartedAt)
 	}
 	if m.finished_at != nil {
 		fields = append(fields, detectionjobinstance.FieldFinishedAt)
@@ -2000,6 +2053,8 @@ func (m *DetectionJobInstanceMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case detectionjobinstance.FieldUpdateTime:
 		return m.UpdateTime()
+	case detectionjobinstance.FieldStartedAt:
+		return m.StartedAt()
 	case detectionjobinstance.FieldFinishedAt:
 		return m.FinishedAt()
 	}
@@ -2015,6 +2070,8 @@ func (m *DetectionJobInstanceMutation) OldField(ctx context.Context, name string
 		return m.OldCreateTime(ctx)
 	case detectionjobinstance.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case detectionjobinstance.FieldStartedAt:
+		return m.OldStartedAt(ctx)
 	case detectionjobinstance.FieldFinishedAt:
 		return m.OldFinishedAt(ctx)
 	}
@@ -2039,6 +2096,13 @@ func (m *DetectionJobInstanceMutation) SetField(name string, value ent.Value) er
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdateTime(v)
+		return nil
+	case detectionjobinstance.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
 		return nil
 	case detectionjobinstance.FieldFinishedAt:
 		v, ok := value.(time.Time)
@@ -2077,6 +2141,9 @@ func (m *DetectionJobInstanceMutation) AddField(name string, value ent.Value) er
 // mutation.
 func (m *DetectionJobInstanceMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(detectionjobinstance.FieldStartedAt) {
+		fields = append(fields, detectionjobinstance.FieldStartedAt)
+	}
 	if m.FieldCleared(detectionjobinstance.FieldFinishedAt) {
 		fields = append(fields, detectionjobinstance.FieldFinishedAt)
 	}
@@ -2094,6 +2161,9 @@ func (m *DetectionJobInstanceMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *DetectionJobInstanceMutation) ClearField(name string) error {
 	switch name {
+	case detectionjobinstance.FieldStartedAt:
+		m.ClearStartedAt()
+		return nil
 	case detectionjobinstance.FieldFinishedAt:
 		m.ClearFinishedAt()
 		return nil
@@ -2110,6 +2180,9 @@ func (m *DetectionJobInstanceMutation) ResetField(name string) error {
 		return nil
 	case detectionjobinstance.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case detectionjobinstance.FieldStartedAt:
+		m.ResetStartedAt()
 		return nil
 	case detectionjobinstance.FieldFinishedAt:
 		m.ResetFinishedAt()

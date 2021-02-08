@@ -50,6 +50,20 @@ func (djic *DetectionJobInstanceCreate) SetNillableUpdateTime(t *time.Time) *Det
 	return djic
 }
 
+// SetStartedAt sets the "started_at" field.
+func (djic *DetectionJobInstanceCreate) SetStartedAt(t time.Time) *DetectionJobInstanceCreate {
+	djic.mutation.SetStartedAt(t)
+	return djic
+}
+
+// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
+func (djic *DetectionJobInstanceCreate) SetNillableStartedAt(t *time.Time) *DetectionJobInstanceCreate {
+	if t != nil {
+		djic.SetStartedAt(*t)
+	}
+	return djic
+}
+
 // SetFinishedAt sets the "finished_at" field.
 func (djic *DetectionJobInstanceCreate) SetFinishedAt(t time.Time) *DetectionJobInstanceCreate {
 	djic.mutation.SetFinishedAt(t)
@@ -205,6 +219,14 @@ func (djic *DetectionJobInstanceCreate) createSpec() (*DetectionJobInstance, *sq
 			Column: detectionjobinstance.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := djic.mutation.StartedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: detectionjobinstance.FieldStartedAt,
+		})
+		_node.StartedAt = &value
 	}
 	if value, ok := djic.mutation.FinishedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

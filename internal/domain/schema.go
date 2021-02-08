@@ -27,6 +27,8 @@ type (
 	DetectionJobInstance struct {
 		ID             int
 		DetectionJobID int // related job
+		StartedAt      time.Time
+		FinishedAt     time.Time
 	}
 	Dataset struct {
 		SiteID    string

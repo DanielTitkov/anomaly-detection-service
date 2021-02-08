@@ -15,6 +15,8 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
+	// FieldStartedAt holds the string denoting the started_at field in the database.
+	FieldStartedAt = "started_at"
 	// FieldFinishedAt holds the string denoting the finished_at field in the database.
 	FieldFinishedAt = "finished_at"
 
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
+	FieldStartedAt,
 	FieldFinishedAt,
 }
 

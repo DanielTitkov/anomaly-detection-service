@@ -2,8 +2,9 @@ package domain
 
 type (
 	FilterAnomaliesArgs struct {
-		JobID int
-		// TODO: add status etc
+		JobID     int
+		Processed *bool
+		// TODO: add other fields
 	}
 	FilterDetectionJobsArgs struct {
 		ID     int

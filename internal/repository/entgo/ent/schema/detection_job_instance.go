@@ -15,6 +15,7 @@ type DetectionJobInstance struct {
 // Fields of the DetectionJobInstance.
 func (DetectionJobInstance) Fields() []ent.Field {
 	return []ent.Field{
+		field.Time("started_at").Nillable().Optional(),
 		field.Time("finished_at").Nillable().Optional(),
 	}
 }

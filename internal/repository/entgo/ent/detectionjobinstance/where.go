@@ -107,6 +107,13 @@ func UpdateTime(v time.Time) predicate.DetectionJobInstance {
 	})
 }
 
+// StartedAt applies equality check predicate on the "started_at" field. It's identical to StartedAtEQ.
+func StartedAt(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStartedAt), v))
+	})
+}
+
 // FinishedAt applies equality check predicate on the "finished_at" field. It's identical to FinishedAtEQ.
 func FinishedAt(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
@@ -263,6 +270,96 @@ func UpdateTimeLT(v time.Time) predicate.DetectionJobInstance {
 func UpdateTimeLTE(v time.Time) predicate.DetectionJobInstance {
 	return predicate.DetectionJobInstance(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// StartedAtEQ applies the EQ predicate on the "started_at" field.
+func StartedAtEQ(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtNEQ applies the NEQ predicate on the "started_at" field.
+func StartedAtNEQ(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtIn applies the In predicate on the "started_at" field.
+func StartedAtIn(vs ...time.Time) predicate.DetectionJobInstance {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStartedAt), v...))
+	})
+}
+
+// StartedAtNotIn applies the NotIn predicate on the "started_at" field.
+func StartedAtNotIn(vs ...time.Time) predicate.DetectionJobInstance {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStartedAt), v...))
+	})
+}
+
+// StartedAtGT applies the GT predicate on the "started_at" field.
+func StartedAtGT(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtGTE applies the GTE predicate on the "started_at" field.
+func StartedAtGTE(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtLT applies the LT predicate on the "started_at" field.
+func StartedAtLT(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtLTE applies the LTE predicate on the "started_at" field.
+func StartedAtLTE(v time.Time) predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStartedAt), v))
+	})
+}
+
+// StartedAtIsNil applies the IsNil predicate on the "started_at" field.
+func StartedAtIsNil() predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStartedAt)))
+	})
+}
+
+// StartedAtNotNil applies the NotNil predicate on the "started_at" field.
+func StartedAtNotNil() predicate.DetectionJobInstance {
+	return predicate.DetectionJobInstance(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStartedAt)))
 	})
 }
 

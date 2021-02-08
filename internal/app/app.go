@@ -7,13 +7,16 @@ import (
 )
 
 type (
+	// App combines services and holds business logic
 	App struct {
-		cfg                 configs.Config
-		logger              *logger.Logger
-		repo                Repository
-		datasetService      DatasetFetcher
-		notificationService Notifier
+		cfg          configs.Config
+		logger       *logger.Logger
+		repo         Repository
+		dataset      DatasetFetcher
+		notification Notifier
+		analyzer     Analyzer
 	}
+	// Repository stores data
 	Repository interface {
 		// anomalies
 		CreateAnomaly(*domain.Anomaly) (*domain.Anomaly, error)
@@ -26,12 +29,15 @@ type (
 		FilterDetectionJobs(*domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error)
 		CreateDetectionInstanceJob(*domain.DetectionJobInstance) (*domain.DetectionJobInstance, error)
 	}
+	// DatasetFetcher fetches dataset for a given job
 	DatasetFetcher interface {
 		Fetch(*domain.DetectionJob) (*domain.Dataset, error)
 	}
+	// Notifier provides notification service
 	Notifier interface {
 		Notify(*domain.Notification) error
 	}
+	// Analyzer provides outlier detection service
 	Analyzer interface {
 		FindOutliers(*domain.Dataset, *domain.DetectionJob) ([]*domain.Anomaly, error)
 	}
@@ -41,12 +47,12 @@ func NewApp(
 	cfg configs.Config,
 	logger *logger.Logger,
 	repo Repository,
-	notificationService Notifier,
+	notification Notifier,
 ) *App {
 	return &App{
-		cfg:                 cfg,
-		logger:              logger,
-		repo:                repo,
-		notificationService: notificationService,
+		cfg:          cfg,
+		logger:       logger,
+		repo:         repo,
+		notification: notification,
 	}
 }

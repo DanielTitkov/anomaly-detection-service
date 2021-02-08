@@ -1,7 +1,23 @@
 package entgo
 
-import "github.com/DanielTitkov/anomaly-detection-service/internal/domain"
+import (
+	"context"
+
+	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
+)
 
 func (r *EntgoRepository) CreateDetectionInstanceJob(i *domain.DetectionJobInstance) (*domain.DetectionJobInstance, error) {
-	return &domain.DetectionJobInstance{}, nil
+	ins, err := r.client.DetectionJobInstance.
+		Create().
+		SetDetectionJobID(i.DetectionJobID).
+		SetStartedAt(i.StartedAt).
+		SetFinishedAt(i.FinishedAt).
+		Save(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	i.ID = ins.ID
+	return i, nil
 }

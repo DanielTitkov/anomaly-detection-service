@@ -30,6 +30,26 @@ func (djiu *DetectionJobInstanceUpdate) Where(ps ...predicate.DetectionJobInstan
 	return djiu
 }
 
+// SetStartedAt sets the "started_at" field.
+func (djiu *DetectionJobInstanceUpdate) SetStartedAt(t time.Time) *DetectionJobInstanceUpdate {
+	djiu.mutation.SetStartedAt(t)
+	return djiu
+}
+
+// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
+func (djiu *DetectionJobInstanceUpdate) SetNillableStartedAt(t *time.Time) *DetectionJobInstanceUpdate {
+	if t != nil {
+		djiu.SetStartedAt(*t)
+	}
+	return djiu
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (djiu *DetectionJobInstanceUpdate) ClearStartedAt() *DetectionJobInstanceUpdate {
+	djiu.mutation.ClearStartedAt()
+	return djiu
+}
+
 // SetFinishedAt sets the "finished_at" field.
 func (djiu *DetectionJobInstanceUpdate) SetFinishedAt(t time.Time) *DetectionJobInstanceUpdate {
 	djiu.mutation.SetFinishedAt(t)
@@ -207,6 +227,19 @@ func (djiu *DetectionJobInstanceUpdate) sqlSave(ctx context.Context) (n int, err
 			Column: detectionjobinstance.FieldUpdateTime,
 		})
 	}
+	if value, ok := djiu.mutation.StartedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: detectionjobinstance.FieldStartedAt,
+		})
+	}
+	if djiu.mutation.StartedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: detectionjobinstance.FieldStartedAt,
+		})
+	}
 	if value, ok := djiu.mutation.FinishedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -325,6 +358,26 @@ type DetectionJobInstanceUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *DetectionJobInstanceMutation
+}
+
+// SetStartedAt sets the "started_at" field.
+func (djiuo *DetectionJobInstanceUpdateOne) SetStartedAt(t time.Time) *DetectionJobInstanceUpdateOne {
+	djiuo.mutation.SetStartedAt(t)
+	return djiuo
+}
+
+// SetNillableStartedAt sets the "started_at" field if the given value is not nil.
+func (djiuo *DetectionJobInstanceUpdateOne) SetNillableStartedAt(t *time.Time) *DetectionJobInstanceUpdateOne {
+	if t != nil {
+		djiuo.SetStartedAt(*t)
+	}
+	return djiuo
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (djiuo *DetectionJobInstanceUpdateOne) ClearStartedAt() *DetectionJobInstanceUpdateOne {
+	djiuo.mutation.ClearStartedAt()
+	return djiuo
 }
 
 // SetFinishedAt sets the "finished_at" field.
@@ -507,6 +560,19 @@ func (djiuo *DetectionJobInstanceUpdateOne) sqlSave(ctx context.Context) (_node 
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: detectionjobinstance.FieldUpdateTime,
+		})
+	}
+	if value, ok := djiuo.mutation.StartedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: detectionjobinstance.FieldStartedAt,
+		})
+	}
+	if djiuo.mutation.StartedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: detectionjobinstance.FieldStartedAt,
 		})
 	}
 	if value, ok := djiuo.mutation.FinishedAt(); ok {

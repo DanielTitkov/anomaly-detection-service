@@ -61,6 +61,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
 		{Name: "detection_job_instance", Type: field.TypeInt, Nullable: true},
 	}
@@ -72,7 +73,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "detection_job_instances_detection_jobs_instance",
-				Columns: []*schema.Column{DetectionJobInstancesColumns[4]},
+				Columns: []*schema.Column{DetectionJobInstancesColumns[5]},
 
 				RefColumns: []*schema.Column{DetectionJobsColumns[0]},
 				OnDelete:   schema.SetNull,

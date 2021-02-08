@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/anomaly"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjob"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjobinstance"
 )
 
 func (r *EntgoRepository) CreateAnomaly(a *domain.Anomaly) (*domain.Anomaly, error) {
@@ -26,7 +29,41 @@ func (r *EntgoRepository) CreateAnomaly(a *domain.Anomaly) (*domain.Anomaly, err
 }
 
 func (r *EntgoRepository) FilterAnomalies(args *domain.FilterAnomaliesArgs) ([]*domain.Anomaly, error) {
-	return []*domain.Anomaly{}, nil
+	query := r.client.Anomaly.Query().WithDetectionJobInstance()
+
+	if args.JobID != 0 {
+		query = query.Where(
+			anomaly.HasDetectionJobInstanceWith(
+				detectionjobinstance.HasDetectionJobWith(
+					detectionjob.IDEQ(args.JobID),
+				),
+			),
+		)
+	}
+
+	if args.Processed != nil {
+		query = query.Where(anomaly.ProcessedEQ(*args.Processed))
+	}
+
+	anoms, err := query.All(context.TODO())
+	if err != nil {
+		return []*domain.Anomaly{}, err
+	}
+
+	var res []*domain.Anomaly
+	for _, anom := range anoms {
+		res = append(res, &domain.Anomaly{
+			ID: anom.ID,
+			// DetectionJobInstanceID: anom.Edges.DetectionJobInstance.ID,
+			Type:        anom.Type,
+			Value:       anom.Value,
+			Processed:   anom.Processed,
+			PeriodStart: anom.PeriodStart,
+			PeriodEnd:   anom.PeriodEnd,
+		})
+	}
+
+	return res, nil
 }
 
 func (r *EntgoRepository) SetAnomalyStatus(anomalyID int, processed bool) error {
