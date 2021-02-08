@@ -4,15 +4,38 @@ import (
 	"context"
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjob"
 )
 
 func (r *EntgoRepository) CreateDetectionJob(j *domain.DetectionJob) (*domain.DetectionJob, error) {
-	return &domain.DetectionJob{}, nil
+	var schedule *string
+	if j.Schedule != "" {
+		schedule = &j.Schedule
+	}
+
+	job, err := r.client.DetectionJob.
+		Create().
+		SetNillableSchedule(schedule).
+		SetSiteID(j.SiteID).
+		SetTimeAgo(j.TimeAgo).
+		SetTimeStep(j.TimeStep).
+		SetMethod(j.Method).
+		SetMetric(j.Metric).
+		SetAttribute(j.Attribute).
+		SetDescription(j.Description).
+		Save(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	j.ID = job.ID
+	return j, nil
 }
 
 func (r *EntgoRepository) DeleteDetectionJobByID(id int) error {
-	return nil
+	return r.client.DetectionJob.DeleteOneID(id).Exec(context.TODO())
 }
 
 func (r *EntgoRepository) GetDetectionJobByID(id int) (*domain.DetectionJob, error) {
@@ -24,10 +47,43 @@ func (r *EntgoRepository) GetDetectionJobByID(id int) (*domain.DetectionJob, err
 		return nil, err
 	}
 
+	return entToDomainDetectionJob(job), nil
+}
+
+func (r *EntgoRepository) FilterDetectionJobs(args *domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error) {
+	query := r.client.DetectionJob.Query()
+
+	if args.ID != 0 {
+		query = query.Where(detectionjob.IDEQ(args.ID))
+	}
+
+	if args.SiteID != "" {
+		query = query.Where(detectionjob.SiteIDEQ(args.SiteID))
+	}
+
+	if args.Scheduled {
+		query = query.Where(detectionjob.ScheduleNotNil())
+	}
+
+	jobs, err := query.All(context.TODO())
+	if err != nil {
+		return []*domain.DetectionJob{}, err
+	}
+
+	var res []*domain.DetectionJob
+	for _, job := range jobs {
+		res = append(res, entToDomainDetectionJob(job))
+	}
+
+	return res, nil
+}
+
+func entToDomainDetectionJob(job *ent.DetectionJob) *domain.DetectionJob {
 	var schedule string
 	if job.Schedule != nil {
 		schedule = *job.Schedule
 	}
+
 	return &domain.DetectionJob{
 		ID:       job.ID,
 		Schedule: schedule,
@@ -38,9 +94,5 @@ func (r *EntgoRepository) GetDetectionJobByID(id int) (*domain.DetectionJob, err
 		TimeAgo:     job.TimeAgo,
 		TimeStep:    job.TimeStep,
 		Description: job.Description,
-	}, nil
-}
-
-func (r *EntgoRepository) FilterDetectionJobs(args *domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error) {
-	return []*domain.DetectionJob{}, nil
+	}
 }

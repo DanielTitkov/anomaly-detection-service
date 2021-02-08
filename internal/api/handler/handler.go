@@ -29,9 +29,11 @@ func NewHandler(
 }
 
 func (h *Handler) link(e *echo.Echo) {
-	e.POST("/listJobs", h.ListJobsHandler)
-	e.POST("/addJob", h.AddJobHandler)
-	e.POST("/deleteJob", h.DeleteJobHandler)
-	e.POST("/listAnomalies", h.ListAnomaliesHandler)
-	e.POST("/setAnomalyStatus", h.SetAnomalyStatusHandler)
+
+	v1 := e.Group("/api/v1")
+	v1.POST("/listJobs", h.ListJobsHandler)
+	v1.POST("/addJob", h.AddJobHandler)
+	v1.POST("/deleteJob", h.DeleteJobHandler)
+	v1.POST("/listAnomalies", h.ListAnomaliesHandler)
+	v1.POST("/setAnomalyStatus", h.SetAnomalyStatusHandler)
 }

@@ -12,7 +12,7 @@ func (a *App) CreateDetectionJob(job *domain.DetectionJob) error {
 }
 
 func (a *App) DeleteDetectionJob(jobID int) error {
-	return nil
+	return a.repo.DeleteDetectionJobByID(jobID)
 }
 
 func (a *App) ListDetectionJobs(args *domain.FilterDetectionJobsArgs) ([]*domain.DetectionJob, error) {

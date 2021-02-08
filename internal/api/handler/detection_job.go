@@ -13,9 +13,16 @@ func (h *Handler) ListJobsHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, model.OKResponse{
-		Status:  "ok",
-		Message: "",
+	jobs, err := h.app.ListDetectionJobs(&request.Filter)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
+			Message: "failed to filter jobs",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.ListJobsResponse{
+		Jobs: jobs,
 	})
 }
 
@@ -25,9 +32,18 @@ func (h *Handler) AddJobHandler(c echo.Context) error {
 		return err
 	}
 
+	// TODO: add validation
+	err := h.app.CreateDetectionJob(&request.Job)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
+			Message: "failed to create job",
+			Error:   err.Error(),
+		})
+	}
+
 	return c.JSON(http.StatusOK, model.OKResponse{
 		Status:  "ok",
-		Message: "",
+		Message: "job created",
 	})
 }
 
