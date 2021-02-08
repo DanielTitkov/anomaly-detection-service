@@ -6,8 +6,5 @@ db:
 server:
   port: 8000
   host: "0.0.0.0"
-auth:
-  exp: 72000 # hours
-  secret: secret-key
-task:
-  itemLimit: 10
+notification:
+  approveOnSend: false
