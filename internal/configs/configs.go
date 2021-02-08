@@ -10,7 +10,6 @@ type Config struct {
 	Env          string
 	DB           DBConfig
 	Server       ServerConfig
-	Job          JobConfig
 	Notification NotificationConfig
 }
 

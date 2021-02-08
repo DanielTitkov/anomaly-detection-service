@@ -8,7 +8,6 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/cmd/app/prepare"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/app"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/configs"
-	"github.com/DanielTitkov/anomaly-detection-service/internal/job"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/logger"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent"
@@ -52,9 +51,6 @@ func main() {
 	notification := mockNotification.NewService()
 
 	app := app.NewApp(cfg, logger, repo, notification)
-
-	jobs := job.NewService(cfg, logger, app)
-	jobs.GatherSystemSummary() // TODO: maybe hide it inside jobs
 
 	server := prepare.NewServer(cfg, logger, app)
 	logger.Fatal("failed to start server", server.Start(cfg.Server.GetAddress()))

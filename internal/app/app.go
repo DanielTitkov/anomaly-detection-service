@@ -4,6 +4,7 @@ import (
 	"github.com/DanielTitkov/anomaly-detection-service/internal/configs"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/logger"
+	"github.com/robfig/cron"
 )
 
 type (
@@ -15,6 +16,7 @@ type (
 		dataset      DatasetFetcher
 		notification Notifier
 		analyzer     Analyzer
+		cron         *cron.Cron
 	}
 	// Repository stores data
 	Repository interface {
@@ -49,10 +51,14 @@ func NewApp(
 	repo Repository,
 	notification Notifier,
 ) *App {
+	c := cron.New()
+	c.Start()
+
 	return &App{
 		cfg:          cfg,
 		logger:       logger,
 		repo:         repo,
 		notification: notification,
+		cron:         c,
 	}
 }

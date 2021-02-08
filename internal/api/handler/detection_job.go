@@ -5,6 +5,7 @@ import (
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/api/model"
 	"github.com/labstack/echo"
+	"github.com/robfig/cron"
 )
 
 func (h *Handler) ListJobsHandler(c echo.Context) error {
@@ -32,7 +33,17 @@ func (h *Handler) AddJobHandler(c echo.Context) error {
 		return err
 	}
 
-	// TODO: add validation
+	if request.Job.Schedule != "" {
+		_, err := cron.Parse(request.Job.Schedule)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
+				Message: "failed to parse cron schedule",
+				Error:   err.Error(),
+			})
+		}
+	}
+
+	// TODO: add futher validation
 	err := h.app.CreateDetectionJob(&request.Job)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, model.ErrorResponse{

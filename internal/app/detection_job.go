@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
@@ -52,10 +53,33 @@ func (a *App) RunDetectionJob(job *domain.DetectionJob) error {
 	return nil
 }
 
+func (a *App) RunBackgroundJob(job *domain.DetectionJob) {
+	jobStr := fmt.Sprintf("%+v", job)
+	a.logger.Info("running detection job", jobStr)
+	err := a.RunDetectionJob(job)
+	if err != nil {
+		a.logger.Error("detection job failed", err)
+	}
+	a.logger.Info("detection job finished", "")
+}
+
 func (a *App) GetPendingJobs() ([]*domain.DetectionJob, error) {
 	return []*domain.DetectionJob{}, nil
 }
 
-func (a *App) RunJobs() error {
+func (a *App) ScheduleJobs() error {
+	jobs, err := a.repo.FilterDetectionJobs(
+		&domain.FilterDetectionJobsArgs{
+			Scheduled: true,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, job := range jobs {
+		a.cron.AddFunc(job.Schedule, func() { a.RunBackgroundJob(job) })
+	}
+
 	return nil
 }
