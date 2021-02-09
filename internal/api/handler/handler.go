@@ -29,7 +29,6 @@ func NewHandler(
 }
 
 func (h *Handler) link(e *echo.Echo) {
-
 	v1 := e.Group("/api/v1")
 	v1.POST("/listJobs", h.ListJobsHandler)
 	v1.POST("/addJob", h.AddJobHandler)

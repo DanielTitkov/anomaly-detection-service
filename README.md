@@ -158,6 +158,14 @@ Anomalies can be filtered by **jobId** and **processed** factor.
     ]
 }
 ```
+### /api/v1/deleteJob (*not implemented*)
+
+Allows to delete job and remove in from schedule
+
+### /api/v1/setAnomalyStatus (*not implemented*)
+
+Allows to update anomaly status - set processed as *true*/*false*.
+NB: if **approveOnSend** option in configs is *true*, **processed** is automatically 
 
 ## Limitations
 

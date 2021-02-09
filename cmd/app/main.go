@@ -59,6 +59,10 @@ func main() {
 	if err != nil {
 		logger.Fatal("failed to schedule jobs", err)
 	}
+	err = app.ScheduleNotifications()
+	if err != nil {
+		logger.Fatal("failed to schedule notifcations", err)
+	}
 
 	server := prepare.NewServer(cfg, logger, app)
 	logger.Fatal("failed to start server", server.Start(cfg.Server.GetAddress()))

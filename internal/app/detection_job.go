@@ -98,10 +98,5 @@ func (a *App) ScheduleJobs() error {
 		a.logger.Info("scheduled job", job.Schedule)
 	}
 
-	for _, cr := range a.cron.Entries() {
-
-		fmt.Printf("%+v", cr)
-	}
-
 	return nil
 }
