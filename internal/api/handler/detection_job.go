@@ -44,11 +44,25 @@ func (h *Handler) AddJobHandler(c echo.Context) error {
 	}
 
 	// TODO: add futher validation
-	err := h.app.CreateDetectionJob(&request.Job)
+	job, err := h.app.CreateDetectionJob(&request.Job)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
 			Message: "failed to create job",
 			Error:   err.Error(),
+		})
+	}
+
+	if request.Sync {
+		anomalies, err := h.app.RunDetectionJob(job)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
+				Message: "failed to run sync job",
+				Error:   err.Error(),
+			})
+		}
+		return c.JSON(http.StatusOK, model.AddJobResponse{
+			Job:    job,
+			Result: anomalies,
 		})
 	}
 

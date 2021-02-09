@@ -12,7 +12,7 @@ import (
 func (r *EntgoRepository) CreateAnomaly(a *domain.Anomaly) (*domain.Anomaly, error) {
 	anom, err := r.client.Anomaly.
 		Create().
-		SetDetectionJobInstanceID(a.DetectionJobID).
+		SetDetectionJobInstanceID(a.DetectionJobInstanceID).
 		SetProcessed(a.Processed).
 		SetType(a.Type).
 		SetValue(a.Value).

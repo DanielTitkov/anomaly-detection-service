@@ -49,7 +49,9 @@ func NewApp(
 	cfg configs.Config,
 	logger *logger.Logger,
 	repo Repository,
+	dataset DatasetFetcher,
 	notification Notifier,
+	analyzer Analyzer,
 ) *App {
 	c := cron.New()
 	c.Start()
@@ -58,7 +60,9 @@ func NewApp(
 		cfg:          cfg,
 		logger:       logger,
 		repo:         repo,
+		dataset:      dataset,
 		notification: notification,
+		analyzer:     analyzer,
 		cron:         c,
 	}
 }
