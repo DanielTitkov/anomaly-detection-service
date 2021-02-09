@@ -8,4 +8,4 @@ server:
   host: "0.0.0.0"
 notification:
   approveOnSend: false
-  schedule: "*/30 * * * *"
+  schedule: "30 10 * * *"

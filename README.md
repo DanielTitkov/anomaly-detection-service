@@ -13,6 +13,42 @@ To run local version with dockerized database:
 3. `make db` to set up database
 4. `make dev` to run service locally with dev config
 
+## Solution
+
+The service allows to perform one-time and scheduled **detection jobs** for anomaly detection. 
+
+```go
+DetectionJob struct {
+    ID          int
+    Schedule    string // cron string
+    Method      string // e.g, 3-sigmas
+    SiteID      string
+    Metric      string
+    Attribute   string
+    TimeAgo     string // e.g. 30d
+    TimeStep    string // e.g. 1d
+    Description string
+}
+```
+Job can be executed right away or scheduled. On job execution service fetches a dataset (mocked by now) and searches for outliers (mocked by now).
+Each job execution is saved as **detection job instance** and returns an array of **anomalies**.
+**Anomaly** describes a data point marked as outlier. It hodls data points parametres, related job instance id and processed status. The later allow to set anomalies as approved/accepted and stop notifying about them. 
+
+```go
+Anomaly struct {
+    ID                     int
+    DetectionJobID         int     // related job
+    DetectionJobInstanceID int     // related instance
+    Type                   string  // warning or alarm
+    Value                  float64 // outlier item value
+    Processed              bool    // if anomaly is accepted/approved
+    PeriodStart            time.Time
+    PeriodEnd              time.Time
+}
+```
+
+If anomaly is not *processed* regular notification process will get it and send a notification about it (mocked by now).
+
 ## API
 
 ### /api/v1/addJob
@@ -165,10 +201,11 @@ Allows to delete job and remove in from schedule
 ### /api/v1/setAnomalyStatus (*not implemented*)
 
 Allows to update anomaly status - set processed as *true*/*false*.
-NB: if **approveOnSend** option in configs is *true*, **processed** is automatically 
+NB: if **approveOnSend** option in configs is *true*, **processed** is automatically set to *true* after notifying. 
 
 ## Limitations
 
 * use of domain models in API
 * no method to inspect jobs history
 * distributed jobs are not supported
+* job uniqueness is not checked
