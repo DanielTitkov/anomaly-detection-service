@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/DanielTitkov/anomaly-detection-service/internal/domain"
+	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/anomaly"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjob"
 	"github.com/DanielTitkov/anomaly-detection-service/internal/repository/entgo/ent/detectionjobinstance"
@@ -29,7 +30,11 @@ func (r *EntgoRepository) CreateAnomaly(a *domain.Anomaly) (*domain.Anomaly, err
 }
 
 func (r *EntgoRepository) FilterAnomalies(args *domain.FilterAnomaliesArgs) ([]*domain.Anomaly, error) {
-	query := r.client.Anomaly.Query().WithDetectionJobInstance()
+	query := r.client.Anomaly.Query().WithDetectionJobInstance(
+		func(q *ent.DetectionJobInstanceQuery) {
+			q.WithDetectionJob()
+		},
+	)
 
 	if args.JobID != 0 {
 		query = query.Where(
@@ -53,13 +58,14 @@ func (r *EntgoRepository) FilterAnomalies(args *domain.FilterAnomaliesArgs) ([]*
 	var res []*domain.Anomaly
 	for _, anom := range anoms {
 		res = append(res, &domain.Anomaly{
-			ID: anom.ID,
-			// DetectionJobInstanceID: anom.Edges.DetectionJobInstance.ID,
-			Type:        anom.Type,
-			Value:       anom.Value,
-			Processed:   anom.Processed,
-			PeriodStart: anom.PeriodStart,
-			PeriodEnd:   anom.PeriodEnd,
+			ID:                     anom.ID,
+			DetectionJobInstanceID: anom.Edges.DetectionJobInstance.ID,
+			DetectionJobID:         anom.Edges.DetectionJobInstance.Edges.DetectionJob.ID,
+			Type:                   anom.Type,
+			Value:                  anom.Value,
+			Processed:              anom.Processed,
+			PeriodStart:            anom.PeriodStart,
+			PeriodEnd:              anom.PeriodEnd,
 		})
 	}
 

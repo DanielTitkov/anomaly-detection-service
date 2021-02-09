@@ -13,9 +13,16 @@ func (h *Handler) ListAnomaliesHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, model.OKResponse{
-		Status:  "ok",
-		Message: "",
+	anomalies, err := h.app.ListAnomalies(&request.Filter)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
+			Message: "failed to filter anomalies",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.ListAnomaliesResponse{
+		Anomalies: anomalies,
 	})
 }
 

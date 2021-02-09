@@ -85,11 +85,11 @@ func entToDomainDetectionJob(job *ent.DetectionJob) *domain.DetectionJob {
 	}
 
 	return &domain.DetectionJob{
-		ID:       job.ID,
-		Schedule: schedule,
-		Method:   job.Method,
-		SiteID:   job.SiteID,
-		// Metric:    job.Metric,
+		ID:          job.ID,
+		Schedule:    schedule,
+		Method:      job.Method,
+		SiteID:      job.SiteID,
+		Metric:      job.Metric,
 		Attribute:   job.Attribute,
 		TimeAgo:     job.TimeAgo,
 		TimeStep:    job.TimeStep,

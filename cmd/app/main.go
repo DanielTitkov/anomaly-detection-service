@@ -55,6 +55,10 @@ func main() {
 	analyzer := mockAnalyzer.NewService()
 
 	app := app.NewApp(cfg, logger, repo, dataset, notification, analyzer)
+	err = app.ScheduleJobs() // schedule jobs previously stored in database
+	if err != nil {
+		logger.Fatal("failed to schedule jobs", err)
+	}
 
 	server := prepare.NewServer(cfg, logger, app)
 	logger.Fatal("failed to start server", server.Start(cfg.Server.GetAddress()))

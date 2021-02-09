@@ -53,7 +53,7 @@ func (h *Handler) AddJobHandler(c echo.Context) error {
 	}
 
 	if request.Sync {
-		anomalies, err := h.app.RunDetectionJob(job)
+		anomalies, instance, err := h.app.RunDetectionJob(job)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, model.ErrorResponse{
 				Message: "failed to run sync job",
@@ -61,10 +61,14 @@ func (h *Handler) AddJobHandler(c echo.Context) error {
 			})
 		}
 		return c.JSON(http.StatusOK, model.AddJobResponse{
-			Job:    job,
-			Result: anomalies,
+			Job:      job,
+			Instance: instance,
+			Result:   anomalies,
 		})
 	}
+
+	// start async job
+	go h.app.RunBackgroundJob(*job)
 
 	return c.JSON(http.StatusOK, model.OKResponse{
 		Status:  "ok",

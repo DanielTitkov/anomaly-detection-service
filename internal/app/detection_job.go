@@ -8,7 +8,19 @@ import (
 )
 
 func (a *App) CreateDetectionJob(job *domain.DetectionJob) (*domain.DetectionJob, error) {
-	return a.repo.CreateDetectionJob(job)
+	job, err := a.repo.CreateDetectionJob(job)
+	if err != nil {
+		return nil, err
+	}
+
+	if job.Schedule != "" {
+		err = a.cron.AddFunc(job.Schedule, func() { a.RunBackgroundJob(*job) })
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return job, nil
 }
 
 func (a *App) DeleteDetectionJob(jobID int) error {
@@ -19,17 +31,17 @@ func (a *App) ListDetectionJobs(args *domain.FilterDetectionJobsArgs) ([]*domain
 	return a.repo.FilterDetectionJobs(args)
 }
 
-func (a *App) RunDetectionJob(job *domain.DetectionJob) ([]*domain.Anomaly, error) {
+func (a *App) RunDetectionJob(job *domain.DetectionJob) ([]*domain.Anomaly, *domain.DetectionJobInstance, error) {
 	startedAt := time.Now()
 
 	dataset, err := a.dataset.Fetch(job)
 	if err != nil {
-		return []*domain.Anomaly{}, err
+		return []*domain.Anomaly{}, nil, err
 	}
 
 	anomalies, err := a.analyzer.FindOutliers(dataset, job)
 	if err != nil {
-		return []*domain.Anomaly{}, err
+		return []*domain.Anomaly{}, nil, err
 	}
 
 	finishedAt := time.Now()
@@ -39,7 +51,7 @@ func (a *App) RunDetectionJob(job *domain.DetectionJob) ([]*domain.Anomaly, erro
 		FinishedAt:     finishedAt,
 	})
 	if err != nil {
-		return []*domain.Anomaly{}, err
+		return []*domain.Anomaly{}, nil, err
 	}
 
 	for _, anom := range anomalies { // TODO: add bulk method
@@ -50,13 +62,13 @@ func (a *App) RunDetectionJob(job *domain.DetectionJob) ([]*domain.Anomaly, erro
 		}
 	}
 
-	return anomalies, nil
+	return anomalies, instance, nil
 }
 
-func (a *App) RunBackgroundJob(job *domain.DetectionJob) {
+func (a *App) RunBackgroundJob(job domain.DetectionJob) {
 	jobStr := fmt.Sprintf("%+v", job) // TODO: maybe add domain model method
 	a.logger.Info("running detection job", jobStr)
-	_, err := a.RunDetectionJob(job)
+	_, _, err := a.RunDetectionJob(&job)
 	if err != nil {
 		a.logger.Error("detection job failed", err)
 	}
@@ -78,7 +90,17 @@ func (a *App) ScheduleJobs() error {
 	}
 
 	for _, job := range jobs {
-		a.cron.AddFunc(job.Schedule, func() { a.RunBackgroundJob(job) })
+		scheduledJob := *job
+		err = a.cron.AddFunc(job.Schedule, func() { a.RunBackgroundJob(scheduledJob) })
+		if err != nil {
+			return err
+		}
+		a.logger.Info("scheduled job", job.Schedule)
+	}
+
+	for _, cr := range a.cron.Entries() {
+
+		fmt.Printf("%+v", cr)
 	}
 
 	return nil

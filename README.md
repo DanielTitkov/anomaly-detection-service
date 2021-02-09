@@ -40,12 +40,48 @@ Create one-time or scheduled job.
 
 #### Response
 
-If **sync** is *false* service only inform if job was created. 
+If **sync** is *false* service only informs that job was created. 
 
 ```json
 {
     "status": "ok",
     "message": "job created"
+}
+```
+
+If **sync** is *true* the handler will wait until job is completed and return result.
+
+```json
+{
+    "Job": {
+        "ID": 20,
+        "Schedule": "* 10 * 2 1",
+        "Method": "3-sigmas",
+        "SiteID": "brax",
+        "Metric": "foo_metric",
+        "Attribute": "bar_attribute",
+        "TimeAgo": "30d",
+        "TimeStep": "1d",
+        "Description": "just a sample job"
+    },
+    "Instance": {
+        "ID": 11,
+        "DetectionJobID": 20,
+        "StartedAt": "2021-02-09T19:30:35.631405278+03:00",
+        "FinishedAt": "2021-02-09T19:30:35.631447879+03:00"
+    },
+    "Result": [
+        {
+            "ID": 26,
+            "DetectionJobID": 20,
+            "DetectionJobInstanceID": 11,
+            "Type": "warning",
+            "Value": -0.35018186126543377,
+            "Processed": false,
+            "PeriodStart": "2021-01-25T19:30:35.631428292+03:00",
+            "PeriodEnd": "2021-01-25T19:30:35.631428292+03:00"
+        }
+    ]
 }
 ```
 
@@ -86,4 +122,45 @@ Jobs can be filtered by **id**, **siteId**, and **scheduled** factor (if job has
 }
 ```
 
+### /api/v1/listAnomalies
+
+Get list of all anomalies or apply fitler. 
+
+#### Request
+
+```json
+{
+    "filter": {
+        "jobId": 18,
+        "processed": false
+    }
+}
+```
+
+**filter** is optional. 
+Anomalies can be filtered by **jobId** and **processed** factor.
+
+#### Response 
+
+```json
+{
+    "Anomalies": [
+        {
+            "ID": 21,
+            "DetectionJobID": 18,
+            "DetectionJobInstanceID": 9,
+            "Type": "warning",
+            "Value": -0.28370364872687986,
+            "Processed": false,
+            "PeriodStart": "2021-01-12T12:56:54.187577Z",
+            "PeriodEnd": "2021-01-12T12:56:54.187577Z"
+        }
+    ]
+}
+```
+
 ## Limitations
+
+* use of domain models in API
+* no method to inspect jobs history
+* distributed jobs are not supported
